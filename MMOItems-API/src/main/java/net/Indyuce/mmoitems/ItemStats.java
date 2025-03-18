@@ -2,6 +2,7 @@ package net.Indyuce.mmoitems;
 
 import io.lumine.mythic.lib.version.VMaterial;
 import net.Indyuce.mmoitems.stat.*;
+import net.Indyuce.mmoitems.stat.annotation.DeprecatedStat;
 import net.Indyuce.mmoitems.stat.block.*;
 import net.Indyuce.mmoitems.stat.type.*;
 import org.bukkit.Material;
@@ -20,6 +21,9 @@ public class ItemStats {
             SKULL_TEXTURE = new SkullTextureStat(),
             ITEM_DAMAGE = new ItemDamage(),
             CUSTOM_MODEL_DATA = new CustomModelData(),
+            MODEL = new ItemModel(),
+            EQUIPPABLE_SLOT = new EquippableSlot(),
+            EQUIPPABLE_MODEL = new EquippableModel(),
             MAX_DURABILITY = new MaximumDurability(),
             MAX_ITEM_DAMAGE = new MaxItemDamage(),
             WILL_BREAK = new LostWhenBroken(),
@@ -27,6 +31,7 @@ public class ItemStats {
             LORE = new Lore(),
             NBT_TAGS = new NBTTags(),
             MAX_STACK_SIZE = new MaxStackSize(),
+            CAN_BREAK = new CanBreak(),
             LORE_FORMAT = new LoreFormat(),
             TOOLTIP = new TooltipStat(),
 
@@ -86,8 +91,8 @@ public class ItemStats {
             ARROW_POTION_EFFECTS = new ArrowPotionEffects(),
             PVE_DAMAGE = new DoubleStat("PVE_DAMAGE", Material.PORKCHOP, "PvE 伤害", new String[]{"对非人类实体造成的额外伤害。"}, new String[]{"equipment", "gem_stone"}),
             PVP_DAMAGE = new DoubleStat("PVP_DAMAGE", Material.SKELETON_SKULL, "PvP 伤害", new String[]{"对玩家造成的额外伤害。"}, new String[]{"equipment", "gem_stone"}),
-            BLUNT_POWER = new DoubleStat("BLUNT_POWER", Material.IRON_AXE, "钝击强度", new String[]{"范围攻击的半径。", "若设置为2.0，目标周围2格内的敌人将受到伤害。", "&9这个属性只适用于钝器。"}, new String[]{"weapon", "gem_stone"}),
-            BLUNT_RATING = new DoubleStat("BLUNT_RATING", Material.BRICK, "钝击力量", new String[]{"钝击攻击的力量。", "若设置为50%，受到攻击的敌人", "将受到初始伤害的50%。", "&9这个属性只适用于钝器。"}, new String[]{"weapon", "gem_stone"}),
+            BLUNT_POWER = new BluntPower(),
+            BLUNT_RATING = new BluntRating(),
             WEAPON_DAMAGE = new DoubleStat("WEAPON_DAMAGE", Material.IRON_SWORD, "武器伤害", new String[]{"额外的击中武器伤害（以百分比计算）。"}),
             SKILL_DAMAGE = new DoubleStat("SKILL_DAMAGE", Material.BOOK, "技能伤害", new String[]{"额外的技能伤害（以百分比计算）。"}),
             PROJECTILE_DAMAGE = new DoubleStat("PROJECTILE_DAMAGE", Material.ARROW, "弹射物伤害", new String[]{"额外的技能/武器弹道伤害。"}),
@@ -110,9 +115,9 @@ public class ItemStats {
     UNBREAKABLE = new Unbreakable(),
             TIER = new ItemTierStat(),
             SET = new ItemSetStat(),
-            ARMOR = new DoubleStat("ARMOR", Material.GOLDEN_CHESTPLATE, "护甲", new String[]{"赋予持有者的护甲值"}),
-            ARMOR_TOUGHNESS = new DoubleStat("ARMOR_TOUGHNESS", Material.DIAMOND_CHESTPLATE, "护甲韧性", new String[]{"护甲韧性可减少所受的伤害"}),
-            MAX_HEALTH = new DoubleStat("MAX_HEALTH", Material.GOLDEN_APPLE, "最大生命值", new String[]{"物品赋予持有者的额外生命值"}),
+            ARMOR = new Armor(),
+            ARMOR_TOUGHNESS = new ArmorToughness(),
+            MAX_HEALTH = new MaxHealth(),
             UNSTACKABLE = new Unstackable(),
             MAX_MANA = new DoubleStat("MAX_MANA", Material.LAPIS_LAZULI, "最大法力值", new String[]{"增加最大法力值的魔力"}),
             KNOCKBACK_RESISTANCE = new KnockbackResistance(),
@@ -133,6 +138,15 @@ public class ItemStats {
             SAFE_FALL_DISTANCE = new SafeFallDistance(),
             SCALE = new Scale(),
             STEP_HEIGHT = new StepHeight(),
+            BURNING_TIME = new BurningTime(),
+            EXPLOSION_KNOCKBACK_RESISTANCE = new ExplosionKnockbackResistance(),
+            MINING_EFFICIENCY = new MiningEfficiency(),
+            MOVEMENT_EFFICIENCY = new MovementEfficiency(),
+            OXYGEN_BONUS = new OxygenBonus(),
+            SNEAKING_SPEED = new SneakingSpeed(),
+            SUBMERGED_MINING_SPEED = new SubmergedMiningSpeed(),
+            SWEEPING_DAMAGE_RATIO = new SweepingDamageRatio(),
+            WATER_MOVEMENT_EFFICIENCY = new WaterMovementEfficiency(),
 
     // Permanent Effects
     PERM_EFFECTS = new PermanentEffects(),
@@ -224,5 +238,6 @@ public class ItemStats {
      * custom durability is now {@link CustomDurability}
      */
     @Deprecated
+    @DeprecatedStat
     public static final ItemStat DURABILITY = ITEM_DAMAGE;
 }

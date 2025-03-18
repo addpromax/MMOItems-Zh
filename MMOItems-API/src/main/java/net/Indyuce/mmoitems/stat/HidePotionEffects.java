@@ -26,7 +26,7 @@ public class HidePotionEffects extends BooleanStat {
 	}
 
     @BackwardsCompatibility(version = "1.20.5")
-    public static final ItemFlag ITEM_FLAG = UtilityMethods.resolveEnumField(ItemFlag::valueOf,
+    public static final ItemFlag ITEM_FLAG = UtilityMethods.resolveField(ItemFlag::valueOf,
             () -> Arrays.stream(ItemFlag.values()).findAny().get(),
             "HIDE_ADDITIONAL_TOOLTIP", "HIDE_POTION_EFFECTS");
 

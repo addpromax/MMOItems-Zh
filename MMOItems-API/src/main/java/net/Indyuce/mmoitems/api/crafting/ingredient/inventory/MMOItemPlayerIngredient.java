@@ -1,7 +1,7 @@
 package net.Indyuce.mmoitems.api.crafting.ingredient.inventory;
 
-import com.google.gson.JsonParser;
 import io.lumine.mythic.lib.api.item.NBTItem;
+import io.lumine.mythic.lib.gson.JsonParser;
 
 public class MMOItemPlayerIngredient extends PlayerIngredient {
 

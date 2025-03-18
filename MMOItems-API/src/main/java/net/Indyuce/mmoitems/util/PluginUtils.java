@@ -2,6 +2,7 @@ package net.Indyuce.mmoitems.util;
 
 import net.Indyuce.mmoitems.MMOItems;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -19,15 +20,19 @@ public class PluginUtils {
         throw new IllegalStateException("Utility class");
     }
 
-    public static void isDependencyPresent(@NotNull String name, @NotNull Consumer<Void> callback) {
-        if (Bukkit.getPluginManager().getPlugin(name) != null)
-            callback.accept(null);
+    public static void isDependencyPresent(@NotNull String name, @NotNull Consumer<Plugin> callback) {
+        hookDependencyIfPresent(name, false, callback);
     }
 
-    public static void hookDependencyIfPresent(@NotNull String name, @NotNull Consumer<Void> callback) {
-        if (Bukkit.getPluginManager().getPlugin(name) == null)
-            return;
-        callback.accept(null);
-        MMOItems.plugin.getLogger().log(Level.INFO, String.format("挂钩至 %s", name));
+    public static void hookDependencyIfPresent(@NotNull String name, boolean verbose, @NotNull Consumer<Plugin> callback) {
+        Plugin plugin = Bukkit.getPluginManager().getPlugin(name);
+        if (plugin == null) return;
+
+        try {
+            callback.accept(plugin);
+            if (verbose) MMOItems.plugin.getLogger().log(Level.INFO, String.format("挂钩至 %s", name));
+        } catch (Exception exception) {
+            MMOItems.plugin.getLogger().log(Level.INFO, String.format("无法挂钩至 %s (plugin is out-of-date?): %s", name, exception.getMessage()));
+        }
     }
 }

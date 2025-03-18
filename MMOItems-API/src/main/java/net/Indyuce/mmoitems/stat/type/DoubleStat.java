@@ -20,6 +20,7 @@ import net.Indyuce.mmoitems.gui.edition.EditionInventory;
 import net.Indyuce.mmoitems.stat.data.DoubleData;
 import net.Indyuce.mmoitems.stat.data.type.StatData;
 import net.Indyuce.mmoitems.stat.data.type.UpgradeInfo;
+import net.Indyuce.mmoitems.util.MMOUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -42,6 +43,10 @@ public class DoubleStat extends ItemStat<NumericStatFormula, DoubleData> impleme
 
     public DoubleStat(String id, Material mat, String name, String[] lore) {
         this(id, mat, name, lore, new String[]{"!miscellaneous", "!block", "all"}, true);
+    }
+
+    public DoubleStat(String id, Material mat, String name, String lore) {
+        this(id, mat, name, MMOUtils.trimString(LORE_LINE_WIDTH, lore), new String[]{"!miscellaneous", "!block", "all"}, true);
     }
 
     public DoubleStat(String id, Material mat, String name, String[] lore, String[] types, Material... materials) {

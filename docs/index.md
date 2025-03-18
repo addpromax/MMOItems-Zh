@@ -6,7 +6,6 @@ titleTemplate: :title - MagicMC
 
 hero:
   name: MMOItems 中文 WIKI
-  text: 为开发者们带来更好的环境。
   tagline: Ciallo～(∠・ω< )⌒☆​
   actions:
   - theme: brand

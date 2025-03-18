@@ -119,7 +119,7 @@ public class NoClipItem implements Listener {
             final Object oldProfile = MythicLib.plugin.getVersion().getWrapper().getProfile((SkullMeta) oldItem.getItemMeta());
             MythicLib.plugin.getVersion().getWrapper().setProfile((SkullMeta) newItemMeta, oldProfile);
         } catch (RuntimeException exception) {
-            MMOItems.plugin.getLogger().log(Level.WARNING, "Could not set skull texture on stripItemData method in the NoClipItem class. Please report this issue!");
+            MMOItems.plugin.getLogger().log(Level.SEVERE, "Could not set skull texture on stripItemData method in the NoClipItem class. Please report this issue!");
         }
 
         // Copy Leather colors

@@ -55,7 +55,7 @@ AUTOSMELT_PICKAXE:
             - v magma_cream - 1.0..|v netherite_block - 1.0..|v magma_cream - 1.0..
             - v AIR 0 1..|v stick - 1.0..|v AIR 0 1..
             - v AIR 0 1..|v stick - 1.0..|v AIR 0 1..
-UNBREAKABLE_SHEARS:
+SILK_SHEARS:
   base:
     material: SHEARS
     enchants:
@@ -66,3 +66,12 @@ UNBREAKABLE_SHEARS:
       - §7能够采集§9草§7和§2玻璃§7。
     tier: UNCOMMON
     required-level: 5.0
+
+FAST_PICK:
+  base:
+    material: WOODEN_PICKAXE
+    mining-efficiency: 100.0
+    max-item-damage: 100.0
+    lore:
+      - '&7&oInsanely fast, but won''t loot'
+

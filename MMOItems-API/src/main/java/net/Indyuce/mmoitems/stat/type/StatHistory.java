@@ -141,6 +141,8 @@ public class StatHistory {
     public void registerModifierBonus(@NotNull UUID of, @NotNull StatData data) {
         Validate.notNull(of, "Modifier UUID cannot be null");
         Validate.notNull(data, "Stat data cannot be null");
+        if (data.isEmpty()) return;
+
         perModifierBonus.put(of, data);
     }
 
@@ -205,6 +207,8 @@ public class StatHistory {
     public void registerGemstoneData(@NotNull UUID of, @NotNull StatData data) {
         Validate.notNull(of, "Gemstone ID cannot be null");
         Validate.notNull(data, "Stat data cannot be null");
+        if (data.isEmpty()) return;
+
         perGemstoneData.put(of, data);
     }
 
@@ -255,6 +259,8 @@ public class StatHistory {
      */
     public void registerExternalData(@NotNull StatData data) {
         Validate.notNull(data, "Stat data cannot be null");
+        if (data.isEmpty()) return;
+
         perExternalData.add(data);
     }
 

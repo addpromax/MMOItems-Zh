@@ -1,6 +1,7 @@
 package net.Indyuce.mmoitems.stat;
 
 import io.lumine.mythic.lib.api.item.NBTItem;
+import io.lumine.mythic.lib.version.Sounds;
 import net.Indyuce.mmoitems.ItemStats;
 import net.Indyuce.mmoitems.api.Type;
 import net.Indyuce.mmoitems.api.event.item.ApplySoulboundEvent;
@@ -10,6 +11,7 @@ import net.Indyuce.mmoitems.api.item.mmoitem.MMOItem;
 import net.Indyuce.mmoitems.api.item.mmoitem.VolatileMMOItem;
 import net.Indyuce.mmoitems.api.player.PlayerData;
 import net.Indyuce.mmoitems.api.util.message.Message;
+import net.Indyuce.mmoitems.stat.annotation.HasCategory;
 import net.Indyuce.mmoitems.stat.data.SoulboundData;
 import net.Indyuce.mmoitems.stat.type.ConsumableItemInteraction;
 import net.Indyuce.mmoitems.stat.type.DoubleStat;
@@ -17,7 +19,6 @@ import net.Indyuce.mmoitems.util.MMOUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
+@HasCategory(cat = "soulbound")
 public class SoulbindingChance extends DoubleStat implements ConsumableItemInteraction {
 	private static final Random random = new Random();
 
@@ -70,12 +72,12 @@ public class SoulbindingChance extends DoubleStat implements ConsumableItemInter
 			Message.SUCCESSFULLY_BIND_ITEM
 					.format(ChatColor.YELLOW, "#item#", MMOUtils.getDisplayName(target.getItem()), "#level#", MMOUtils.intToRoman(soulboundLevel))
 					.send(player);
-			player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 2);
+			player.playSound(player.getLocation(), Sounds.ENTITY_PLAYER_LEVELUP, 1, 2);
 			return true;
 		}
 
 		Message.UNSUCCESSFUL_SOULBOUND.format(ChatColor.RED).send(player);
-		player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1);
+		player.playSound(player.getLocation(), Sounds.ENTITY_VILLAGER_NO, 1, 1);
 		return true;
 	}
 }

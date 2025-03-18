@@ -1,7 +1,8 @@
 package net.Indyuce.mmoitems.api.crafting.trigger;
 
-import net.Indyuce.mmoitems.api.player.PlayerData;
 import io.lumine.mythic.lib.api.MMOLineConfig;
+import io.lumine.mythic.lib.version.Sounds;
+import net.Indyuce.mmoitems.api.player.PlayerData;
 import org.bukkit.Sound;
 
 public class SoundTrigger extends Trigger {
@@ -13,7 +14,7 @@ public class SoundTrigger extends Trigger {
 
 		config.validate("sound");
 
-		sound = Sound.valueOf(config.getString("sound").toUpperCase().replace("-", "_"));
+		sound = Sounds.fromName(config.getString("sound").toUpperCase().replace("-", "_"));
 		vol = (float) config.getDouble("volume", 1);
 		pitch = (float) config.getDouble("pitch", 1);
 	}

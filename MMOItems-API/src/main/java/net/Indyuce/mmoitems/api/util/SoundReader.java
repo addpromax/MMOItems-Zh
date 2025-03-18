@@ -1,5 +1,6 @@
 package net.Indyuce.mmoitems.api.util;
 
+import io.lumine.mythic.lib.version.Sounds;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -22,7 +23,7 @@ public class SoundReader {
         Sound sound;
         String soundKey;
         try {
-            sound = Sound.valueOf(tag);
+            sound = Sounds.fromName(tag);
             soundKey = null;
         } catch (Exception exception) {
             sound = null;

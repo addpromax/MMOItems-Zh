@@ -3,6 +3,7 @@ package net.Indyuce.mmoitems.api.interaction;
 import io.lumine.mythic.lib.MythicLib;
 import io.lumine.mythic.lib.api.item.ItemTag;
 import io.lumine.mythic.lib.api.item.NBTItem;
+import io.lumine.mythic.lib.version.Sounds;
 import net.Indyuce.mmoitems.ItemStats;
 import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.Type;
@@ -14,7 +15,6 @@ import net.Indyuce.mmoitems.stat.data.StringListData;
 import net.Indyuce.mmoitems.util.MMOUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -38,7 +38,7 @@ public class ItemSkin extends UseItem {
             return new ApplyResult(ResultType.NONE);
 
         if (MMOItems.plugin.getConfig().getBoolean("locked-skins") && MMOUtils.isNonEmpty(target.getString(ItemSkin.SKIN_ID_TAG))) {
-            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1);
+            player.playSound(player.getLocation(), Sounds.ENTITY_VILLAGER_NO, 1, 1);
             Message.SKIN_REJECTED.format(ChatColor.RED, "#item#", MMOUtils.getDisplayName(target.getItem())).send(player);
             return new ApplyResult(ResultType.NONE);
         }
@@ -50,7 +50,7 @@ public class ItemSkin extends UseItem {
             //SKIN//MMOItems.log("\u00a78SKIN \u00a7eCPT\u00a77 Testing that TYPE is compatible: ");
             final List<String> acceptedTypes = ((StringListData) mmoitem.getData(ItemStats.COMPATIBLE_TYPES)).getList();
             if (acceptedTypes.size() > 0 && acceptedTypes.stream().noneMatch(s -> s.equalsIgnoreCase(targetType.getId()))) {
-                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 2);
+                player.playSound(player.getLocation(), Sounds.ENTITY_PLAYER_LEVELUP, 1, 2);
                 Message.SKIN_INCOMPATIBLE.format(ChatColor.RED, "#item#", MMOUtils.getDisplayName(target.getItem()))
                         .send(player);
                 return new ApplyResult(ResultType.NONE);
@@ -65,7 +65,7 @@ public class ItemSkin extends UseItem {
 
             if (acceptedIDs.size() > 0 && acceptedIDs.stream()
                     .noneMatch(s -> s.equalsIgnoreCase(targetId))) {
-                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 2);
+                player.playSound(player.getLocation(), Sounds.ENTITY_PLAYER_LEVELUP, 1, 2);
                 Message.SKIN_INCOMPATIBLE.format(ChatColor.RED, "#item#", MMOUtils.getDisplayName(target.getItem()))
                         .send(player);
                 return new ApplyResult(ResultType.NONE);
@@ -79,7 +79,7 @@ public class ItemSkin extends UseItem {
 
             if (acceptedMaterials.size() > 0 && acceptedMaterials.stream()
                     .noneMatch(s -> s.equalsIgnoreCase(target.getItem().getType().name()))) {
-                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 2);
+                player.playSound(player.getLocation(), Sounds.ENTITY_PLAYER_LEVELUP, 1, 2);
                 Message.SKIN_INCOMPATIBLE.format(ChatColor.RED, "#item#", MMOUtils.getDisplayName(target.getItem()))
                         .send(player);
                 return new ApplyResult(ResultType.NONE);
@@ -90,7 +90,7 @@ public class ItemSkin extends UseItem {
         double successRate = getNBTItem().getStat(ItemStats.SUCCESS_RATE.getId());
         if (successRate != 0)
             if (RANDOM.nextDouble() < 1 - successRate / 100) {
-                player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1, 1);
+                player.playSound(player.getLocation(), Sounds.ENTITY_ITEM_BREAK, 1, 1);
                 Message.SKIN_BROKE.format(ChatColor.RED, "#item#", MMOUtils.getDisplayName(target.getItem()))
                         .send(player);
                 return new ApplyResult(ResultType.FAILURE);
@@ -99,7 +99,7 @@ public class ItemSkin extends UseItem {
         // Apply skin
         ItemStack item = applySkin(target, mmoitem);
 
-        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 2);
+        player.playSound(player.getLocation(), Sounds.ENTITY_PLAYER_LEVELUP, 1, 2);
         Message.SKIN_APPLIED.format(ChatColor.YELLOW, "#item#", MMOUtils.getDisplayName(target.getItem())).send(player);
 
         return new ApplyResult(item);

@@ -6,7 +6,7 @@ import net.Indyuce.mmoitems.stat.data.StringData;
 import net.Indyuce.mmoitems.stat.type.ChooseStat;
 import net.Indyuce.mmoitems.stat.type.GemStoneStat;
 import net.Indyuce.mmoitems.util.StatChoice;
-import net.Indyuce.mmoitems.util.VersionDependant;
+import net.Indyuce.mmoitems.stat.annotation.VersionDependant;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
@@ -29,14 +29,20 @@ public class TrimMaterialStat extends ChooseStat implements GemStoneStat {
         if (!isEnabled()) return;
 
         for (TrimMaterial mat : Registry.TRIM_MATERIAL)
-            addChoices(new StatChoice(mat.getKey().getKey()));
+            addChoices(new StatChoice(mat.getKey().toString()));
+    }
+
+    @Nullable
+    @Override
+    public StatChoice getChoice(String id) {
+        return super.getChoice(TrimPatternStat.fixNamespacedKey(id).toString());
     }
 
     @Override
     public void whenApplied(@NotNull ItemStackBuilder item, @NotNull StringData data) {
         if (!(item.getMeta() instanceof ArmorMeta)) return;
 
-        @Nullable TrimMaterial material = Registry.TRIM_MATERIAL.get(NamespacedKey.minecraft(data.toString().toLowerCase()));
+        @Nullable TrimMaterial material = Registry.TRIM_MATERIAL.get(TrimPatternStat.fixNamespacedKey(data.toString().toLowerCase()));
         if (material == null) return;
 
         final ArmorMeta meta = (ArmorMeta) item.getMeta();
@@ -49,6 +55,6 @@ public class TrimMaterialStat extends ChooseStat implements GemStoneStat {
         if (!(mmoitem.getNBT().getItem().getItemMeta() instanceof ArmorMeta)) return;
         final ArmorMeta meta = (ArmorMeta) mmoitem.getNBT().getItem().getItemMeta();
         if (!meta.hasTrim()) return;
-        mmoitem.setData(this, new StringData(meta.getTrim().getMaterial().getKey().getKey()));
+        mmoitem.setData(this, new StringData(meta.getTrim().getMaterial().getKey().toString()));
     }
 }

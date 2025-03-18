@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 
 /**
  * Its absolute <b><i><u>pain</u></i></b> that PhatLoots keeps giving outdated
@@ -17,6 +18,9 @@ import org.bukkit.inventory.meta.ItemMeta;
  * as they are generated.
  */
 public class PhatLootsHook implements Listener {
+
+    public PhatLootsHook(Plugin pl) {
+    }
 
     @EventHandler
     public void OnLootBeLooted(MobDropLootEvent event) { handle(event);}

@@ -85,15 +85,24 @@ additional-experience-woodcutting: '&7■ 额外伐木经验: &f<plus>{value}%'
 
 # 1.20.2+ Attributes
 block-break-speed: '&3 &7■ 挖掘速度: &f<plus>{value}'
-block-interaction-range: '&3 &7■ 方块交互距离: &f<plus>{value}' # Range for interacting with blocks & mining.
-entity-interaction-range: '&3 &7■ 攻击距离: &f<plus>{value}'
-fall-damage-multiplier: '&3 &7■ 摔落伤害: &f<plus>{value}%'
-gravity: '&3 &7■ 重力: &f<plus>{value}%'
-jump-strength: '&3 &7■ 跳跃高度: &f<plus>{value}'
-max-absorption: '&3 &7■ 伤害吸收: &f<plus>{value}'
-safe-fall-distance: '&3 &7■ 安全摔落距离: &f<plus>{value}'
-scale: '&3 &7■ 大小: &f<plus>{value}%'
-step-height: '&3 &7■ Smooth Walking: &f<plus>{value}'  # TODO 不知道怎么翻，先放着
+block-interaction-range: '&3 &7■ 范围: &f<plus>{value}' # Range for interacting with blocks & mining.
+entity-interaction-range: '&3 &7■ 战斗范围: &f<plus>{value}'
+fall-damage-multiplier: '&3 &7■ 坠落伤害: &f<plus>{value}%'
+gravity: '&3 &7■ 重力强度: &f<plus>{value}%'
+jump-strength: '&3 &7■ 跳跃强度: &f<plus>{value}'
+max-absorption: '&3 &7■ 最大伤害吸收: &f<plus>{value}'
+safe-fall-distance: '&3 &7■ 安全坠落距离: &f<plus>{value}'
+scale: ' &3 &7■ 大小: &f<plus>{value}%'
+step-height: ' &3 &7■ 平稳行走: &f<plus>{value}'
+burning-time: '&3 &7■ 燃烧时间: &f<plus>{value}%'
+explosion-knockback-resistance: '&3 &7■ 爆炸击退抗性: &f<plus>{value}%'
+mining-efficiency: '&3 &7■ 挖掘效率: &f<plus>{value}'
+movement-efficiency: '&3 &7■ 移动效率: &f<plus>{value}%'
+oxygen-bonus: '&3 &7■ 水下呼吸: &f<plus>{value}'
+sneaking-speed: '&3 &7■ 潜行速度: &f<plus>{value}%'
+submerged-mining-speed: '&3 &7■ 水下挖掘速度: &f<plus>{value}%'
+sweeping-damage-ratio: '&3 &7■ 横扫伤害: &f<plus>{value}%'
+water-movement-efficiency: '&3 &7■ 水下移动速度: &f<plus>{value}%'
 
 # Extra Options
 perm-effects: '&3 &7■ 永久效果 &f{effect}'

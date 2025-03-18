@@ -1,19 +1,7 @@
 package net.Indyuce.mmoitems.stat.data;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
+import io.lumine.mythic.lib.gson.JsonObject;
 import io.lumine.mythic.lib.version.VParticle;
-import net.Indyuce.mmoitems.util.MMOUtils;
-import org.apache.commons.lang.Validate;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.configuration.ConfigurationSection;
-
-import com.google.gson.JsonObject;
-
 import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.item.build.MMOItemBuilder;
 import net.Indyuce.mmoitems.api.player.PlayerData;
@@ -21,6 +9,16 @@ import net.Indyuce.mmoitems.particle.api.ParticleRunnable;
 import net.Indyuce.mmoitems.particle.api.ParticleType;
 import net.Indyuce.mmoitems.stat.data.random.RandomStatData;
 import net.Indyuce.mmoitems.stat.data.type.StatData;
+import net.Indyuce.mmoitems.util.MMOUtils;
+import org.apache.commons.lang.Validate;
+import org.bukkit.Color;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.configuration.ConfigurationSection;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class ParticleData implements StatData, RandomStatData<ParticleData> {
 	private final ParticleType type;
@@ -94,14 +92,12 @@ public class ParticleData implements StatData, RandomStatData<ParticleData> {
 	}
 
 	public void display(Location location, int amount, float offsetX, float offsetY, float offsetZ, float speed) {
-		if (particle == VParticle.REDSTONE.get()) {
+		if (particle.getDataType() == Particle.DustOptions.class) {
 			location.getWorld().spawnParticle(particle, location, amount, offsetX, offsetY, offsetZ, new Particle.DustOptions(color, 1));
 		}
-        else if (particle == VParticle.ENTITY_EFFECT.get() || particle == VParticle.ENTITY_EFFECT_AMBIENT.get()) {
+        else if (particle.getDataType() == Color.class) {
             // 0 for amount to allow colors (Thats why there is a for loop). Then the offsets are RGB values from 0.0 - 1.0, last 1 is the brightness.
-        	for (int i = 0; i < amount; i++) {
-        		location.getWorld().spawnParticle(particle, location, 0, (float) color.getRed() / 255, (float) color.getGreen() / 255, (float) color.getBlue() / 255, 1);
-        	}
+			location.getWorld().spawnParticle(particle, location, amount, speed, offsetX, offsetY, offsetZ, color);
         }
         // else if (particle == Particle.NOTE) { Do Fancy Color Stuff Good Luck } 
         // The above code semi-worked for note particles but I think there is a limited amount of colors so its harder and prob have to get the nearest one.

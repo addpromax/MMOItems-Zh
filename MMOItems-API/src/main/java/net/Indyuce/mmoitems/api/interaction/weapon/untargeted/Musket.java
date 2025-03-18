@@ -7,12 +7,12 @@ import io.lumine.mythic.lib.comp.interaction.InteractionType;
 import io.lumine.mythic.lib.damage.DamageType;
 import io.lumine.mythic.lib.player.PlayerMetadata;
 import io.lumine.mythic.lib.util.RayTrace;
+import io.lumine.mythic.lib.version.Sounds;
 import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.interaction.weapon.Weapon;
 import net.Indyuce.mmoitems.api.player.PlayerData;
 import org.bukkit.Color;
 import org.bukkit.Location;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 @Deprecated
@@ -52,6 +52,6 @@ public class Musket extends Weapon implements LegacyWeapon {
             stats.attack(trace.getHit(), stats.getStat("ATTACK_DAMAGE"), DamageType.WEAPON, DamageType.PHYSICAL, DamageType.PROJECTILE);
 
         trace.draw(.5, Color.BLACK);
-        getPlayer().getWorld().playSound(getPlayer().getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 2, 2);
+        getPlayer().getWorld().playSound(getPlayer().getLocation(), Sounds.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 2, 2);
     }
 }

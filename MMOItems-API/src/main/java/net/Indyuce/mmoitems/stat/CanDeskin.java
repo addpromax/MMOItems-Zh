@@ -1,10 +1,10 @@
 package net.Indyuce.mmoitems.stat;
 
-import com.google.gson.JsonObject;
 import io.lumine.mythic.lib.MythicLib;
 import io.lumine.mythic.lib.api.item.ItemTag;
 import io.lumine.mythic.lib.api.item.NBTItem;
 import io.lumine.mythic.lib.api.util.SmartGive;
+import io.lumine.mythic.lib.gson.JsonObject;
 import net.Indyuce.mmoitems.ItemStats;
 import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.Type;
@@ -111,7 +111,7 @@ public class CanDeskin extends BooleanStat implements ConsumableItemInteraction 
                 final MMOItem mmoitem = template.newBuilder(playerData.getRPG()).build();
                 new SmartGive(player).give(mmoitem.newBuilder().build());
             } catch (Exception exception) {
-                MMOItems.plugin.getLogger().log(Level.WARNING, "无法检索玩家 ID 为 '" + skinId + "' 的物品皮肤 " + playerData.getUniqueId());
+                MMOItems.plugin.getLogger().log(Level.SEVERE, "无法检索玩家 ID 为 '" + skinId + "' 的物品皮肤 " + playerData.getUniqueId());
                 // No luck :(
             }
 

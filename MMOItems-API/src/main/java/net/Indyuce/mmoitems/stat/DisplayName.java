@@ -24,7 +24,10 @@ import java.util.ArrayList;
 public class DisplayName extends StringStat implements GemStoneStat {
 
     public DisplayName() {
-        super("NAME", Material.OAK_SIGN, "显示名称", new String[]{"物品显示名称"},
+        super("NAME",
+                Material.NAME_TAG,
+                "显示名称",
+                new String[]{"物品显示名称"},
                 new String[0]);
     }
 

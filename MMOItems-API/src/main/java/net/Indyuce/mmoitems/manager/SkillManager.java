@@ -97,7 +97,7 @@ public class SkillManager {
 
                 // Should not happen
             } catch (IOException exception) {
-                MMOItems.plugin.getLogger().log(Level.WARNING, "Could not save default ability configs: " + exception.getMessage());
+                MMOItems.plugin.getLogger().log(Level.SEVERE, "Could not save default ability configs: " + exception.getMessage());
             }
         }
 
@@ -120,7 +120,7 @@ public class SkillManager {
 
                 // Fail
             } catch (RuntimeException exception) {
-                MMOItems.plugin.getLogger().log(Level.WARNING, "Could not load skill '" + handler.getId() + "': " + exception.getMessage());
+                MMOItems.plugin.getLogger().log(Level.SEVERE, "Could not load skill '" + handler.getId() + "': " + exception.getMessage());
             }
         }
     }

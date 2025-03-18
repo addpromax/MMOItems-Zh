@@ -5,7 +5,6 @@ import io.lumine.mythic.lib.UtilityMethods;
 import io.lumine.mythic.lib.api.item.NBTItem;
 import io.lumine.mythic.lib.player.cooldown.CooldownObject;
 import io.lumine.mythic.lib.player.modifier.ModifierSource;
-import io.lumine.mythic.lib.script.Script;
 import io.lumine.mythic.lib.skill.handler.SkillHandler;
 import io.lumine.mythic.lib.util.PostLoadAction;
 import io.lumine.mythic.lib.util.PreloadedObject;
@@ -18,6 +17,7 @@ import net.Indyuce.mmoitems.api.item.util.identify.UnidentifiedItem;
 import net.Indyuce.mmoitems.api.player.PlayerData;
 import net.Indyuce.mmoitems.manager.TypeManager;
 import net.Indyuce.mmoitems.stat.type.ItemStat;
+import net.Indyuce.mmoitems.util.MMOUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -97,19 +97,16 @@ public class Type implements CooldownObject, PreloadedObject {
      * - types of modifiers an item of this type would give
      * - the lore format
      */
-    private Type parent;
+    private final Type parent;
 
     private UnidentifiedItem unidentifiedTemplate;
 
     private SkillHandler<?> onLeftClick, onRightClick, onAttack, onEntityInteract;
 
-    public Script ent;
-
     private boolean meleeAttacks, hideInGame;
 
     /**
-     * List of stats which can be applied onto an item which has this type. This
-     * improves performance when generating an item by a significant amount.
+     * Cached list of stats which can be applied onto an item with this type
      */
     private final List<ItemStat> available = new ArrayList<>();
 
@@ -132,6 +129,7 @@ public class Type implements CooldownObject, PreloadedObject {
         this.id = UtilityMethods.enumName(id);
         this.modifierSource = modifierSource;
         this.interactionProvider = interactionProvider;
+        this.parent = null;
     }
 
     /**
@@ -139,7 +137,8 @@ public class Type implements CooldownObject, PreloadedObject {
      */
     public Type(@NotNull TypeManager manager, @NotNull ConfigurationSection config) {
         id = UtilityMethods.enumName(config.getName());
-        parent = manager.get(config.getString("parent", "").toUpperCase().replace("-", "_").replace(" ", "_"));
+        Validate.isTrue(config.contains("parent"), "Custom types require a parent type");
+        parent = manager.getOrThrow(UtilityMethods.enumName(config.getString("parent")));
         modifierSource = config.contains("modifier-source") ? ModifierSource.valueOf(UtilityMethods.enumName(config.getString("modifier-source"))) : (parent != null ? parent.modifierSource : ModifierSource.OTHER);
         interactionProvider = parent.interactionProvider;
     }
@@ -148,8 +147,8 @@ public class Type implements CooldownObject, PreloadedObject {
         postLoadAction.cacheConfig(config);
 
         name = config.getString("name", name);
-        item = read(config.getString("display", item == null ? Material.STONE.toString() : item.getType().toString()));
-        (unidentifiedTemplate = new UnidentifiedItem(this)).update(config.getConfigurationSection("unident-item"));
+        item = MMOUtils.readIcon(config.getString("display", item == null ? Material.STONE.toString() : item.getType().toString()));
+        unidentifiedTemplate = new UnidentifiedItem(config.getConfigurationSection("unident-item"));
         loreFormat = config.getString("LoreFormat", (parent != null ? parent.loreFormat : null));
         attackCooldownKey = config.getString("attack-cooldown-key", "default");
         meleeAttacks = !config.getBoolean("disable-melee-attacks");
@@ -284,14 +283,6 @@ public class Type implements CooldownObject, PreloadedObject {
 
     public UnidentifiedItem getUnidentifiedTemplate() {
         return unidentifiedTemplate;
-    }
-
-    private ItemStack read(String str) {
-        Validate.notNull(str, "Input must not be null");
-
-        String[] split = str.split(":");
-        Material material = Material.valueOf(split[0]);
-        return split.length > 1 ? MythicLib.plugin.getVersion().getWrapper().textureItem(material, Integer.parseInt(split[1])) : new ItemStack(material);
     }
 
     @Override

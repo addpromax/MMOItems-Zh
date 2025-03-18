@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
@@ -116,8 +117,9 @@ public class UseItem {
     }
 
     @Deprecated
+    @Nullable
     public static UseItem getItem(Player player, NBTItem item, String type) {
-        return getItem(player, item, Type.get(type));
+        return Type.get(type).toUseItem(player, item);
     }
 
     @Deprecated

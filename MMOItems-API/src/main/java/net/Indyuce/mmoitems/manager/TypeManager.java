@@ -31,7 +31,7 @@ public class TypeManager {
                 if (Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers()) && field.get(null) instanceof Type)
                     register((Type) field.get(null));
             } catch (Exception exception) {
-                MMOItems.plugin.getLogger().log(Level.WARNING, "Couldn't register type called '" + field.getName() + "': " + exception.getMessage());
+                MMOItems.plugin.getLogger().log(Level.SEVERE, "Couldn't register type called '" + field.getName() + "': " + exception.getMessage());
             }
 
         // Load custom types
@@ -42,7 +42,7 @@ public class TypeManager {
                 try {
                     register(new Type(this, config.getConfigurationSection(id)));
                 } catch (IllegalArgumentException exception) {
-                    MMOItems.plugin.getLogger().log(Level.WARNING, "Could not register type '" + id + "': " + exception.getMessage());
+                    MMOItems.plugin.getLogger().log(Level.SEVERE, "Could not register type '" + id + "': " + exception.getMessage());
                 }
 
         for (Iterator<Type> iterator = map.values().iterator(); iterator.hasNext(); ) {
@@ -54,7 +54,7 @@ public class TypeManager {
                 type.load(section);
                 if (clearBefore) type.getPostLoadAction().performAction();
             } catch (RuntimeException exception) {
-                MMOItems.plugin.getLogger().log(Level.WARNING, "Could not register type '" + type.getId() + "': " + exception.getMessage());
+                MMOItems.plugin.getLogger().log(Level.SEVERE, "Could not register type '" + type.getId() + "': " + exception.getMessage());
                 iterator.remove();
                 continue;
             }
@@ -74,7 +74,7 @@ public class TypeManager {
             try {
                 type.getPostLoadAction().performAction();
             } catch (RuntimeException exception) {
-                MMOItems.plugin.getLogger().log(Level.WARNING, "An error occured while post-loading type '" + type.getId() + "': " + exception.getMessage());
+                MMOItems.plugin.getLogger().log(Level.SEVERE, "An error occured while post-loading type '" + type.getId() + "': " + exception.getMessage());
             }
     }
 

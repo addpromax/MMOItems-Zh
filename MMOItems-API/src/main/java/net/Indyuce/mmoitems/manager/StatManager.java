@@ -1,12 +1,16 @@
 package net.Indyuce.mmoitems.manager;
 
 import io.lumine.mythic.lib.MythicLib;
+import io.lumine.mythic.lib.UtilityMethods;
 import io.lumine.mythic.lib.element.Element;
 import io.lumine.mythic.lib.util.annotation.BackwardsCompatibility;
 import net.Indyuce.mmoitems.ItemStats;
 import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.ConfigFile;
 import net.Indyuce.mmoitems.api.Type;
+import net.Indyuce.mmoitems.stat.annotation.DeprecatedStat;
+import net.Indyuce.mmoitems.stat.annotation.HasCategory;
+import net.Indyuce.mmoitems.stat.category.StatCategory;
 import net.Indyuce.mmoitems.stat.type.*;
 import net.Indyuce.mmoitems.util.ElementStatType;
 import org.apache.commons.lang.Validate;
@@ -23,13 +27,14 @@ import java.util.logging.Level;
 
 public class StatManager {
     private final Map<String, ItemStat<?, ?>> stats = new LinkedHashMap<>();
+    private final Map<String, StatCategory> categories = new HashMap<>();
 
     /**
      * If, for whatever reason, a stat needs to change its internal
      * string ID, this map keeps a reference for the deprecated old
      * IDs while being separated from the main ItemStat map.
      */
-    @BackwardsCompatibility(version = "unknown")
+    @BackwardsCompatibility(version = "not_specified")
     private final Map<String, ItemStat<?, ?>> legacyAliases = new HashMap<>();
 
     /*
@@ -37,8 +42,8 @@ public class StatManager {
      * the first time to make their access easier. Check the classes
      * individually to understand better
      */
-    private final List<DoubleStat> numeric = new ArrayList<>();
-    private final List<ItemRestriction> itemRestriction = new ArrayList<>();
+    private final List<DoubleStat> numericStats = new ArrayList<>();
+    private final List<ItemRestriction> itemRestrictions = new ArrayList<>();
     private final List<ConsumableItemInteraction> consumableActions = new ArrayList<>();
     private final List<PlayerConsumable> playerConsumables = new ArrayList<>();
 
@@ -46,13 +51,29 @@ public class StatManager {
      * Load default stats using java reflection, get all public static final
      * fields in the ItemStat and register them as stat instances
      */
-    public void loadInternalStats() {
+    public void loadBuiltins() {
+
+        // Builtin categories
+        for (Field field : StatCategory.class.getFields())
+            try {
+                if (Modifier.isStatic(field.getModifiers())
+                        && Modifier.isFinal(field.getModifiers())
+                        && field.get(null) instanceof StatCategory)
+                    registerCategory((StatCategory) field.get(null));
+            } catch (IllegalArgumentException | IllegalAccessException exception) {
+                MMOItems.plugin.getLogger().log(Level.SEVERE, String.format("Couldn't register category called '%s': %s", field.getName(), exception.getMessage()));
+            }
+
+        // Load builtin stats
         for (Field field : ItemStats.class.getFields())
             try {
-                if (Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers()) && field.get(null) instanceof ItemStat)
+                if (Modifier.isStatic(field.getModifiers())
+                        && Modifier.isFinal(field.getModifiers())
+                        && field.get(null) instanceof ItemStat
+                        && field.getAnnotation(DeprecatedStat.class) == null)
                     register((ItemStat<?, ?>) field.get(null));
             } catch (IllegalArgumentException | IllegalAccessException exception) {
-                MMOItems.plugin.getLogger().log(Level.WARNING, String.format("Couldn't register stat called '%s'", field.getName()), exception.getMessage());
+                MMOItems.plugin.getLogger().log(Level.SEVERE, String.format("Couldn't register stat called '%s': %s", field.getName(), exception.getMessage()));
             }
 
         // Custom stats
@@ -64,20 +85,20 @@ public class StatManager {
 
         // Clean fictive numeric stats before
         if (cleanFirst)
-            numeric.removeIf(stat -> stat instanceof FictiveNumericStat); // temporary fix, this is for elements.
+            numericStats.removeIf(stat -> stat instanceof FakeElementalStat); // temporary fix, this is for elements TODO improve
 
         // Register elemental stats
         loadElements();
 
         // Load stat translation objects (nothing to do with stats)
         final ConfigurationSection statOptions = new ConfigFile("/language", "stats").getConfig();
-        for (ItemStat stat : getAll())
+        for (ItemStat<?, ?> stat : getAll())
             try {
                 @Nullable Object object = statOptions.get(stat.getPath());
                 if (object == null) object = statOptions.get(stat.getLegacyTranslationPath());
                 stat.loadConfiguration(statOptions, object != null ? object : "<TranslationNotFound:" + stat.getPath() + ">");
             } catch (RuntimeException exception) {
-                MMOItems.plugin.getLogger().log(Level.WARNING, "Could not load options for stat '" + stat.getId() + "': " + exception.getMessage());
+                MMOItems.plugin.getLogger().log(Level.SEVERE, "Could not load translation info for stat '" + stat.getId() + "': " + exception.getMessage());
             }
     }
 
@@ -100,7 +121,16 @@ public class StatManager {
     public void loadElements() {
         for (ElementStatType type : ElementStatType.values())
             for (Element element : MythicLib.plugin.getElements().getAll())
-                numeric.add(new FictiveNumericStat(element, type));
+                numericStats.add(new FakeElementalStat(element, type));
+    }
+
+    public void registerCategory(@NotNull StatCategory category) {
+        categories.put(category.getId(), category);
+    }
+
+    @NotNull
+    public StatCategory getCategory(@NotNull String id) {
+        return Objects.requireNonNull(categories.get(id), "No stat category found with ID '" + id + "'");
     }
 
     @NotNull
@@ -116,7 +146,7 @@ public class StatManager {
      */
     @NotNull
     public List<DoubleStat> getNumericStats() {
-        return numeric;
+        return numericStats;
     }
 
     /**
@@ -125,7 +155,7 @@ public class StatManager {
      */
     @NotNull
     public List<ItemRestriction> getItemRestrictionStats() {
-        return itemRestriction;
+        return itemRestrictions;
     }
 
     /**
@@ -158,7 +188,7 @@ public class StatManager {
         if (stat != null) return stat;
 
         // Numeric registry (see to-do)
-        stat = numeric.stream().filter(doubleStat -> doubleStat.getId().equals(id)).findFirst().orElse(null);
+        stat = numericStats.stream().filter(doubleStat -> doubleStat.getId().equals(id)).findFirst().orElse(null);
         if (stat != null) return stat;
 
         // Legacy liases
@@ -170,16 +200,6 @@ public class StatManager {
     }
 
     /**
-     * @deprecated Stat IDs are now stored in the stat instance directly.
-     * Please use StatManager#register(ItemStat) instead
-     */
-    @Deprecated
-    @SuppressWarnings("unused")
-    public void register(String id, ItemStat<?, ?> stat) {
-        register(stat);
-    }
-
-    /**
      * Registers a stat in MMOItems. It must be done right after MMOItems loads
      * before any manager is initialized because stats are commonly used when
      * loading configs.
@@ -187,33 +207,29 @@ public class StatManager {
      * @param stat The stat to register
      */
     public void register(@NotNull ItemStat<?, ?> stat) {
-        register(stat, false);
-    }
-
-    private void register(@NotNull ItemStat<?, ?> stat, boolean customStat) {
 
         // Skip disabled stats.
         if (!stat.isEnabled()) return;
 
-        // Safe check, this can happen with numerous extra RPG plugins
-        if (stats.containsKey(stat.getId())) {
-            MMOItems.plugin.getLogger().log(Level.WARNING, "Could not register stat '" + stat.getId() + "' as a stat with the same ID already exists.");
-            return;
-        }
+        // Register stat
+        stats.compute(stat.getId(), (id, current) -> {
+            Validate.isTrue(current == null, "A stat with ID '" + id + "' already exists");
+            return stat;
+        });
 
-        // Main registry
-        stats.put(stat.getId(), stat);
-
-        // Register aliases
-        for (String alias : stat.getAliases())
-            legacyAliases.put(alias, stat);
+        // Register aliases (backwards compatibility)
+        for (String alias : stat.getAliases()) legacyAliases.put(alias, stat);
 
         // Use-case specific registries
         if (stat instanceof DoubleStat && !(stat instanceof GemStoneStat) && stat.isCompatible(Type.GEM_STONE))
-            numeric.add((DoubleStat) stat);
-        if (stat instanceof ItemRestriction) itemRestriction.add((ItemRestriction) stat);
+            numericStats.add((DoubleStat) stat);
+        if (stat instanceof ItemRestriction) itemRestrictions.add((ItemRestriction) stat);
         if (stat instanceof ConsumableItemInteraction) consumableActions.add((ConsumableItemInteraction) stat);
         if (stat instanceof PlayerConsumable) playerConsumables.add((PlayerConsumable) stat);
+
+        // Stat category
+        HasCategory statCatAnnot = stat.getClass().getAnnotation(HasCategory.class);
+        if (statCatAnnot != null) stat.setCategory(getCategory(UtilityMethods.enumName(statCatAnnot.cat())));
 
         /*
          * Cache stat for every type which may have this stat. Really important
@@ -267,5 +283,23 @@ public class StatManager {
                  NoSuchMethodException e) {
             throw new RuntimeException("Unable to create a custom stat of type " + type, e);
         }
+    }
+
+    /**
+     * @see #register(ItemStat)
+     * @deprecated Stat IDs are now stored in the stat instance directly.
+     */
+    @Deprecated
+    @SuppressWarnings("unused")
+    public void register(@Nullable String id, @NotNull ItemStat<?, ?> stat) {
+        register(stat);
+    }
+
+    /**
+     * @see #loadBuiltins()
+     */
+    @Deprecated
+    public void loadInternalStats() {
+        loadBuiltins();
     }
 }

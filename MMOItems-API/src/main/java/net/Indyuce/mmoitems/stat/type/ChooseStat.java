@@ -1,11 +1,10 @@
 package net.Indyuce.mmoitems.stat.type;
 
 import io.lumine.mythic.lib.api.util.AltChar;
-import io.lumine.mythic.lib.api.util.ui.SilentNumbers;
 import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.gui.edition.EditionInventory;
 import net.Indyuce.mmoitems.stat.data.StringData;
-import net.Indyuce.mmoitems.stat.data.random.RandomStatData;
+import net.Indyuce.mmoitems.util.MMOUtils;
 import net.Indyuce.mmoitems.util.StatChoice;
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
@@ -15,7 +14,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Choose Stats present a list of options from which the user may choose one.
@@ -52,7 +54,7 @@ public abstract class ChooseStat extends StringStat {
 
     @Override
     public void whenClicked(@NotNull EditionInventory inv, @NotNull InventoryClickEvent event) {
-        Validate.isTrue(choices.size() > 0, "基于选择的统计数据无效 '" + getId() + ": 没有可供选择的选项");
+        Validate.isTrue(!choices.isEmpty(), "基于选择的统计数据无效 '" + getId() + ": 没有可供选择的选项");
 
         // If removing, reset to default
         if (event.getAction() == InventoryAction.PICKUP_HALF) {
@@ -67,18 +69,14 @@ public abstract class ChooseStat extends StringStat {
         } else {
 
             // Get current
-            StatChoice current = getChoice(inv.getEditedSection().getString(getPath()));
-
-            // Included?
-            int currentIndex = current != null ? Math.max(0, choices.indexOf(current)) : 0;
+            String found = inv.getEditedSection().getString(getPath());
+            int currentIndex = found == null ? -1 : choices.indexOf(getChoice(found));
 
             // Increase and Cap
             if (++currentIndex >= choices.size()) currentIndex = 0;
 
-            // Get
-            current = choices.get(currentIndex);
-
             // Edits into persistent files
+            StatChoice current = choices.get(currentIndex);
             inv.getEditedSection().set(getPath(), current.getId());
             inv.registerTemplateEdition();
 
@@ -89,14 +87,14 @@ public abstract class ChooseStat extends StringStat {
 
     @Override
     public void whenDisplayed(List<String> lore, Optional<StringData> statData) {
-        Validate.isTrue(choices.size() > 0, "基于选择的统计数据无效 '" + getId() + ": 没有可供选择的选项");
+        Validate.isTrue(!choices.isEmpty(), "基于选择的统计数据无效 '" + getId() + ": 没有可供选择的选项");
 
         // To display current choosing, gets the very first element
-        StatChoice def = statData.isPresent() ? getChoice(statData.get().toString()) : choices.get(0);
-        lore.add(ChatColor.GRAY + "当前值: " + (statData.isPresent() ? ChatColor.GREEN : ChatColor.RED) + def);
+        @Nullable StatChoice found = statData.isPresent() ? getChoice(statData.get().toString()) : null;
+        lore.add(ChatColor.GRAY + "当前值: " + (found != null ? ChatColor.GREEN + found.getId() : ChatColor.RED + "None"));
 
         // Display Definition
-        for (String definition : SilentNumbers.chop(def.getHint(), 50, ""))
+        if (found != null && found.getHint() != null) for (String definition : MMOUtils.trimString(LORE_LINE_WIDTH, found.getHint()))
             lore.add(ChatColor.GRAY + " " + definition);
 
         lore.add("");
@@ -105,7 +103,7 @@ public abstract class ChooseStat extends StringStat {
         for (StatChoice existing : choices) {
 
             // Is it the one?
-            String pick = existing.equals(def) ? ChatColor.RED.toString() + ChatColor.BOLD : ChatColor.GOLD.toString();
+            String pick = existing.equals(found) ? ChatColor.RED.toString() + ChatColor.BOLD : ChatColor.GOLD.toString();
             lore.add(pick + "  " + AltChar.smallListDash + " " + ChatColor.GRAY + existing.getId());
         }
     }

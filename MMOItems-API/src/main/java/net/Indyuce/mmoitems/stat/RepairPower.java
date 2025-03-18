@@ -1,6 +1,7 @@
 package net.Indyuce.mmoitems.stat;
 
 import io.lumine.mythic.lib.api.item.NBTItem;
+import io.lumine.mythic.lib.version.Sounds;
 import net.Indyuce.mmoitems.ItemStats;
 import net.Indyuce.mmoitems.api.CustomSound;
 import net.Indyuce.mmoitems.api.Type;
@@ -15,7 +16,6 @@ import net.Indyuce.mmoitems.util.MMOUtils;
 import net.Indyuce.mmoitems.util.RepairUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
@@ -50,18 +50,18 @@ public class RepairPower extends DoubleStat implements ConsumableItemInteraction
         final @Nullable String repairType2 = target.getString(REPAIR_TYPE_TAG_KEY);
         if (!MMOUtils.checkReference(repairType1, repairType2)) {
             Message.UNABLE_TO_REPAIR.format(ChatColor.RED, "#item#", MMOUtils.getDisplayName(target.getItem())).send(player);
-            player.getPlayer().playSound(player.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1.5f);
+            player.getPlayer().playSound(player.getPlayer().getLocation(), Sounds.ENTITY_VILLAGER_NO, 1, 1.5f);
             return false;
         }
 
         // Custom durability
-        final boolean customDurability = target.hasTag("MMOITEMS_DURABILITY");
-        if (customDurability) {
-            final DurabilityItem durItem = new DurabilityItem(player, target);
+        final DurabilityItem durItem = DurabilityItem.from(player, target);
+        if (durItem != null) {
             if (durItem.getDurability() >= durItem.getMaxDurability()) return false;
 
             final int repairPower = repairAmountSupplier.apply(durItem);
-            target.getItem().setItemMeta(durItem.addDurability(repairPower).toItem().getItemMeta());
+            durItem.addDurability(repairPower);
+            durItem.updateInInventory();
             Message.REPAIRED_ITEM
                     .format(ChatColor.YELLOW, "#item#", MMOUtils.getDisplayName(target.getItem()), "#amount#", String.valueOf(repairPower))
                     .send(player);

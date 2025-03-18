@@ -1,13 +1,12 @@
 package net.Indyuce.mmoitems.command.mmoitems.debug;
 
+import io.lumine.mythic.lib.command.api.CommandTreeNode;
+import io.lumine.mythic.lib.version.Attributes;
 import io.lumine.mythic.lib.version.VPotionEffectType;
 import org.bukkit.ChatColor;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
-
-import io.lumine.mythic.lib.command.api.CommandTreeNode;
 
 public class HealCommandTreeNode extends CommandTreeNode {
 	public HealCommandTreeNode(CommandTreeNode parent) {
@@ -22,7 +21,7 @@ public class HealCommandTreeNode extends CommandTreeNode {
 		}
 
 		Player player = (Player) sender;
-		player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+		player.setHealth(player.getAttribute(Attributes.MAX_HEALTH).getValue());
 		player.setFoodLevel(20);
 		player.setFireTicks(0);
 		player.setSaturation(12);

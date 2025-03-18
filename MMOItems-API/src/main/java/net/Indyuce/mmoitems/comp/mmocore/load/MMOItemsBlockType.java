@@ -7,6 +7,7 @@ import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.block.CustomBlock;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
@@ -31,6 +32,11 @@ public class MMOItemsBlockType implements BlockType {
 		return MMOItems.plugin.getCustomBlocks().isMushroomBlock(block.getType());
 	}
 
+    @Override
+    public @NotNull String display() {
+        return "MMOItems{" + id + "}";
+    }
+
 	@Override
 	public void place(RegeneratingBlock regeneratingBlock) {
 		Location loc = regeneratingBlock.getLocation();
@@ -45,11 +51,6 @@ public class MMOItemsBlockType implements BlockType {
 		place(regeneratingBlock);
 	}
 
-	@Override
-	public String generateKey() {
-		return "mmoitems-custom-block-" + id;
-	}
-	
 	@Override
 	public boolean breakRestrictions(Block block) {
 		return true;

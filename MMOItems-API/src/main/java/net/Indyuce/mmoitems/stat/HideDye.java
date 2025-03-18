@@ -6,7 +6,7 @@ import net.Indyuce.mmoitems.api.item.build.ItemStackBuilder;
 import net.Indyuce.mmoitems.api.item.mmoitem.ReadMMOItem;
 import net.Indyuce.mmoitems.stat.data.BooleanData;
 import net.Indyuce.mmoitems.stat.type.BooleanStat;
-import net.Indyuce.mmoitems.util.VersionDependant;
+import net.Indyuce.mmoitems.stat.annotation.VersionDependant;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.NotNull;

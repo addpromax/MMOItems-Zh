@@ -1,12 +1,12 @@
 package net.Indyuce.mmoitems.stat;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import io.lumine.mythic.lib.UtilityMethods;
 import io.lumine.mythic.lib.api.item.ItemTag;
 import io.lumine.mythic.lib.api.item.SupportedNBTTagValues;
 import io.lumine.mythic.lib.api.util.AltChar;
+import io.lumine.mythic.lib.gson.JsonObject;
+import io.lumine.mythic.lib.gson.JsonParser;
+import io.lumine.mythic.lib.gson.JsonSyntaxException;
 import io.lumine.mythic.lib.version.VParticle;
 import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.item.build.ItemStackBuilder;
@@ -129,7 +129,7 @@ public class ArrowParticles extends ItemStat<ArrowParticlesData, ArrowParticlesD
 
 	@Override
 	public void whenClicked(@NotNull EditionInventory inv, @NotNull InventoryClickEvent event) {
-		new ArrowParticlesEdition(inv.getPlayer(), inv.getEdited()).open(inv);
+		new ArrowParticlesEdition(inv.getNavigator(), inv.getEdited()).open(inv);
 	}
 
 	@Override

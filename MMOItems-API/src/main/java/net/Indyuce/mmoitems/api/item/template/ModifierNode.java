@@ -56,7 +56,7 @@ public class ModifierNode implements PreloadedObject {
                 child.getPostLoadAction().performAction();
                 ModifierNode.this.children.add(child);
             } catch (RuntimeException exception) {
-                MMOItems.plugin.getLogger().log(Level.WARNING, "Could not load parent modifier node '" + key + "' of modifier group '" + getId() + "': " + exception.getMessage());
+                MMOItems.plugin.getLogger().log(Level.SEVERE, "Could not load parent modifier node '" + key + "' of modifier group '" + getId() + "': " + exception.getMessage());
             }
 
         // Post-load stat data
@@ -69,7 +69,7 @@ public class ModifierNode implements PreloadedObject {
                 Validate.notNull(stat, "Could not find stat with ID '" + statId + "'");
                 ModifierNode.this.data.put(stat, stat.whenInitialized(statSection.get(key)));
             } catch (IllegalArgumentException exception) {
-                MMOItems.plugin.getLogger().log(Level.WARNING, "An error occurred while trying to load modifier node " + getId() + ": " + exception.getMessage());
+                MMOItems.plugin.getLogger().log(Level.SEVERE, "An error occurred while trying to load modifier node " + getId() + ": " + exception.getMessage());
             }
     });
 

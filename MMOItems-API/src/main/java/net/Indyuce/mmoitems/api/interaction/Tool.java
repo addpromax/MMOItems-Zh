@@ -4,9 +4,8 @@ import io.lumine.mythic.lib.MythicLib;
 import io.lumine.mythic.lib.UtilityMethods;
 import io.lumine.mythic.lib.api.item.NBTItem;
 import io.lumine.mythic.lib.comp.flags.CustomFlag;
-import io.lumine.mythic.lib.math3.geometry.euclidean.threed.Line;
-import io.lumine.mythic.lib.math3.geometry.euclidean.threed.Vector3D;
 import io.lumine.mythic.lib.version.OreDrops;
+import io.lumine.mythic.lib.version.Sounds;
 import io.lumine.mythic.lib.version.VEnchantment;
 import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.event.BouncingCrackBlockBreakEvent;
@@ -16,7 +15,6 @@ import net.Indyuce.mmoitems.util.MMOUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -64,8 +62,8 @@ public class Tool extends Weapon {
             getPlayerData().applyCooldown(PlayerData.CooldownType.BOUNCING_CRACK, 1);
             new BukkitRunnable() {
                 final Vector globalDirection = player.getEyeLocation().getDirection();
-                final Vector3D sourcePoint = toJava(block.getLocation().add(.5, .5, .5).toVector());
-                final Line line = new Line(sourcePoint, sourcePoint.add(toJava(globalDirection)), 1e-10);
+                final Vector point1 = block.getLocation().add(.5, .5, .5).toVector();
+                final Vector point2 = point1.clone().add(globalDirection);
                 final double[] products = new double[NEIGHBORS.length];
 
                 {
@@ -93,7 +91,7 @@ public class Tool extends Weapon {
                     }
 
                     curr.breakNaturally(getItem());
-                    curr.getWorld().playSound(curr.getLocation(), Sound.BLOCK_GRAVEL_BREAK, 1, 1);
+                    curr.getWorld().playSound(curr.getLocation(), Sounds.BLOCK_GRAVEL_BREAK, 1, 1);
                 }
 
                 @NotNull
@@ -115,8 +113,8 @@ public class Tool extends Weapon {
                 }
 
                 private double findCost(BlockFace candidate, Block candidateBlock) {
-                    final Vector3D center = toJava(candidateBlock.getLocation().add(.5, .5, .5).toVector());
-                    return line.distance(center) - products[candidate.ordinal()];
+                    final Vector center = candidateBlock.getLocation().add(.5, .5, .5).toVector();
+                    return dist(center, point1, point2) - products[candidate.ordinal()];
                 }
 
             }.runTaskTimer(MMOItems.plugin, 0, 1);
@@ -125,7 +123,14 @@ public class Tool extends Weapon {
         return cancel;
     }
 
-    private Vector3D toJava(Vector vector) {
-        return new Vector3D(vector.getX(), vector.getY(), vector.getZ());
+    /**
+     * d(A, BC) = norm(BA x BC) / norm(BC)
+     *
+     * @return Distance from point A to line (BC)
+     */
+    private double dist(Vector a, Vector b, Vector c) {
+        final Vector ab = b.clone().subtract(a);
+        final Vector bc = c.clone().subtract(b);
+        return ab.getCrossProduct(bc).length() / bc.length();
     }
 }

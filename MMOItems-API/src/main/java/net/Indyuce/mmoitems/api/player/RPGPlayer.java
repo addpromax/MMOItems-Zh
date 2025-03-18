@@ -1,12 +1,12 @@
 package net.Indyuce.mmoitems.api.player;
 
 import io.lumine.mythic.lib.api.item.NBTItem;
+import io.lumine.mythic.lib.version.Sounds;
 import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.util.message.Message;
 import net.Indyuce.mmoitems.stat.type.ItemRestriction;
 import net.Indyuce.mmoitems.util.MMOUtils;
 import org.bukkit.ChatColor;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -113,7 +113,7 @@ public abstract class RPGPlayer {
         if (item.hasTag("MMOITEMS_UNIDENTIFIED_ITEM")) {
             if (message) {
                 Message.UNIDENTIFIED_ITEM.format(ChatColor.RED).send(player.getPlayer());
-                player.getPlayer().playSound(player.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1.5f);
+                player.getPlayer().playSound(player.getPlayer().getLocation(), Sounds.ENTITY_VILLAGER_NO, 1, 1.5f);
             }
             return false;
         }

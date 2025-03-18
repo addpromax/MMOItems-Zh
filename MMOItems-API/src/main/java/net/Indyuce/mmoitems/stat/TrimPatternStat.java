@@ -6,7 +6,7 @@ import net.Indyuce.mmoitems.stat.data.StringData;
 import net.Indyuce.mmoitems.stat.type.ChooseStat;
 import net.Indyuce.mmoitems.stat.type.GemStoneStat;
 import net.Indyuce.mmoitems.util.StatChoice;
-import net.Indyuce.mmoitems.util.VersionDependant;
+import net.Indyuce.mmoitems.stat.annotation.VersionDependant;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
@@ -29,14 +29,25 @@ public class TrimPatternStat extends ChooseStat implements GemStoneStat {
         if (!isEnabled()) return;
 
         for (TrimPattern mat : Registry.TRIM_PATTERN)
-            addChoices(new StatChoice(mat.getKey().getKey()));
+            addChoices(new StatChoice(mat.getKey().toString()));
+    }
+
+    public static NamespacedKey fixNamespacedKey(String str) {
+        if (!str.contains(":")) return NamespacedKey.minecraft(str);
+        return NamespacedKey.fromString(str);
+    }
+
+    @Nullable
+    @Override
+    public StatChoice getChoice(String id) {
+        return super.getChoice(fixNamespacedKey(id).toString());
     }
 
     @Override
     public void whenApplied(@NotNull ItemStackBuilder item, @NotNull StringData data) {
         if (!(item.getMeta() instanceof ArmorMeta)) return;
 
-        @Nullable TrimPattern pattern = Registry.TRIM_PATTERN.get(NamespacedKey.minecraft(data.toString().toLowerCase()));
+        @Nullable TrimPattern pattern = Registry.TRIM_PATTERN.get(fixNamespacedKey(data.toString()));
         if (pattern == null) return;
 
         final ArmorMeta meta = (ArmorMeta) item.getMeta();
@@ -49,6 +60,6 @@ public class TrimPatternStat extends ChooseStat implements GemStoneStat {
         if (!(mmoitem.getNBT().getItem().getItemMeta() instanceof ArmorMeta)) return;
         final ArmorMeta meta = (ArmorMeta) mmoitem.getNBT().getItem().getItemMeta();
         if (!meta.hasTrim()) return;
-        mmoitem.setData(this, new StringData(meta.getTrim().getPattern().getKey().getKey()));
+        mmoitem.setData(this, new StringData(meta.getTrim().getPattern().getKey().toString()));
     }
 }

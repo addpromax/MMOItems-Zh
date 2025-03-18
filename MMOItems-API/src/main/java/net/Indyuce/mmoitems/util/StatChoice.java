@@ -8,7 +8,7 @@ public class StatChoice {
     private final String id, hint;
 
     public StatChoice(String id) {
-        this(id, "- 无提示 -");
+        this(id, null);
     }
 
     public StatChoice(String id, @Nullable String hint) {

@@ -62,7 +62,7 @@ public class LiveMMOItem extends ReadMMOItem {
 
                 // Some unknown error happened
             } catch (IllegalArgumentException exception) {
-                MMOItems.plugin.getLogger().log(Level.WARNING,
+                MMOItems.plugin.getLogger().log(Level.SEVERE,
                         ChatColor.GRAY + "Could not load stat '"
                                 + ChatColor.GOLD + stat.getId() + ChatColor.GRAY + "'item data from '"
                                 + ChatColor.RED + getId() + ChatColor.GRAY + "': "

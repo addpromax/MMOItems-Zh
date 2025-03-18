@@ -1,12 +1,11 @@
 package net.Indyuce.mmoitems.stat;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import io.lumine.mythic.lib.api.item.ItemTag;
 import io.lumine.mythic.lib.api.item.SupportedNBTTagValues;
 import io.lumine.mythic.lib.api.util.AltChar;
-import net.Indyuce.mmoitems.ItemStats;
+import io.lumine.mythic.lib.gson.JsonArray;
+import io.lumine.mythic.lib.gson.JsonParser;
+import io.lumine.mythic.lib.gson.JsonSyntaxException;
 import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.edition.StatEdition;
 import net.Indyuce.mmoitems.api.item.build.ItemStackBuilder;
@@ -43,36 +42,35 @@ public class CompatibleIds extends ItemStat<StringListData, StringListData> {
     @Override
     public void whenClicked(@NotNull EditionInventory inv, @NotNull InventoryClickEvent event) {
         if (event.getAction() == InventoryAction.PICKUP_ALL)
-            new StatEdition(inv, ItemStats.COMPATIBLE_IDS).enable("在聊天中输入您要添加的物品 ID");
+            new StatEdition(inv, this).enable("在聊天中输入您要添加的物品 ID");
 
-        if (event.getAction() != InventoryAction.PICKUP_HALF || !inv.getEditedSection().contains("compatible-ids"))
-            return;
-        List<String> lore = inv.getEditedSection().getStringList("compatible-ids");
-        if (lore.size() < 1)
+        if (event.getAction() != InventoryAction.PICKUP_HALF || !inv.getEditedSection().contains(getPath()))
             return;
 
-        String last = lore.get(lore.size() - 1);
-        lore.remove(last);
-        inv.getEditedSection().set("compatible-ids", lore);
+        List<String> lore = inv.getEditedSection().getStringList(getPath());
+        if (lore.isEmpty()) return;
+
+        String last = lore.removeLast();
+        inv.getEditedSection().set(getPath(), lore);
         inv.registerTemplateEdition();
         inv.getPlayer().sendMessage(MMOItems.plugin.getPrefix() + "成功删除 '" + last + "'");
     }
 
     @Override
     public void whenInput(@NotNull EditionInventory inv, @NotNull String message, Object... info) {
-        List<String> lore = inv.getEditedSection().contains("compatible-ids") ? inv.getEditedSection().getStringList("compatible-ids")
+        List<String> lore = inv.getEditedSection().contains(getPath()) ? inv.getEditedSection().getStringList(getPath())
                 : new ArrayList<>();
         lore.add(message.toUpperCase());
-        inv.getEditedSection().set("compatible-ids", lore);
+        inv.getEditedSection().set(getPath(), lore);
         inv.registerTemplateEdition();
-        inv.getPlayer().sendMessage(MMOItems.plugin.getPrefix() + "已成功添加兼容 ID");
+        inv.getPlayer().sendMessage(MMOItems.plugin.getPrefix() + "ID '" + message.toUpperCase() + "' 已成功添加兼容 ID");
     }
 
     @Override
     public void whenDisplayed(List<String> lore, Optional<StringListData> statData) {
         if (statData.isPresent()) {
             lore.add(ChatColor.GRAY + "Current Value:");
-            statData.get().getList().forEach(str -> lore.add(ChatColor.GRAY + str));
+            statData.get().getList().forEach(str -> lore.add(ChatColor.GRAY + "* " + str));
         } else
             lore.add(ChatColor.GRAY + "当前值: " + ChatColor.RED + " 与任何物品兼容");
 
@@ -91,7 +89,7 @@ public class CompatibleIds extends ItemStat<StringListData, StringListData> {
     public void whenApplied(@NotNull ItemStackBuilder item, @NotNull StringListData data) {
         // Copy Array, for lore
         List<String> compatibleIds = new ArrayList<>(data.getList());
-        item.getLore().insert("compatible-ids", compatibleIds);
+        item.getLore().insert(getPath(), compatibleIds);
 
         // Add data
         item.addItemTag(getAppliedNBT(data));

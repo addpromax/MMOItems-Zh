@@ -5,6 +5,9 @@ export default defineConfig({
   title: "MMOItems 中文 Wiki",
   titleTemplate: ":title - MagicMC",
   base: "/",
+  sitemap: {
+    hostname: 'https://mmoitems.magicmc.top'
+  },
   head: [
     [ "meta", { name: "theme-color", content: "#3c8772" }],
     [ "link", { rel: "icon", href: "/icon.png" }]
@@ -105,7 +108,7 @@ export default defineConfig({
     },
     editLink: {
       pattern:
-        "https://github.com/MagicMC-Dev/MMOItems-Zh/edit/Zh_cn/docs/src/:path",
+        "https://github.com/MagicMC-Dev/MMOItems-Zh/edit/Zh_cn/docs/:path",
       text: "在 GitHub 上编辑此页面",
     },
     socialLinks: [{ icon: "github", link: "https://github.com/MagicMC-Dev" }],

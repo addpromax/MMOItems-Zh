@@ -7,7 +7,7 @@ import net.Indyuce.mmoitems.stat.type.GemStoneStat;
 
 public class SuccessRate extends DoubleStat implements GemStoneStat {
 
-	/*
+	/**
 	 * in a different class because Success Rate is meant to be a proper stat
 	 */
 	public SuccessRate() {

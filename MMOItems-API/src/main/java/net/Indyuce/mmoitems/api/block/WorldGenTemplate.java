@@ -1,5 +1,6 @@
 package net.Indyuce.mmoitems.api.block;
 
+import io.lumine.mythic.lib.version.VersionUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -90,8 +91,8 @@ public class WorldGenTemplate {
 
         // check biome list
         Biome biome = pos.getWorld().getBiome(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
-        if ((!biomeWhitelist.isEmpty() && !biomeWhitelist.contains(biome.name()))
-                || (!biomeBlacklist.isEmpty() && biomeBlacklist.contains(biome.name())))
+        if ((!biomeWhitelist.isEmpty() && !biomeWhitelist.contains(VersionUtils.name(biome)))
+                || (!biomeBlacklist.isEmpty() && biomeBlacklist.contains(VersionUtils.name(biome))))
             return false;
 
         // check extra options

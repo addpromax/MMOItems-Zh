@@ -1,6 +1,5 @@
 package net.Indyuce.mmoitems;
 
-import io.lumine.mythic.lib.UtilityMethods;
 import io.lumine.mythic.lib.api.item.NBTItem;
 import io.lumine.mythic.lib.api.util.ui.FriendlyFeedbackMessage;
 import io.lumine.mythic.lib.api.util.ui.FriendlyFeedbackProvider;
@@ -16,10 +15,7 @@ import net.Indyuce.mmoitems.api.player.PlayerData;
 import net.Indyuce.mmoitems.api.util.MMOItemReforger;
 import net.Indyuce.mmoitems.api.util.message.FFPMMOItems;
 import net.Indyuce.mmoitems.command.MMOItemsCommandTreeRoot;
-import net.Indyuce.mmoitems.comp.MMOItemsMetrics;
-import net.Indyuce.mmoitems.comp.MMOItemsRewardTypes;
-import net.Indyuce.mmoitems.comp.McMMONonRPGHook;
-import net.Indyuce.mmoitems.comp.WorldEditSupport;
+import net.Indyuce.mmoitems.comp.*;
 import net.Indyuce.mmoitems.comp.eco.VaultSupport;
 import net.Indyuce.mmoitems.comp.enchants.CrazyEnchantsStat;
 import net.Indyuce.mmoitems.comp.enchants.EnchantPlugin;
@@ -35,7 +31,6 @@ import net.Indyuce.mmoitems.comp.rpg.DefaultHook;
 import net.Indyuce.mmoitems.comp.rpg.HeroesHook;
 import net.Indyuce.mmoitems.comp.rpg.McMMOHook;
 import net.Indyuce.mmoitems.comp.rpg.RPGHandler;
-import net.Indyuce.mmoitems.gui.PluginInventory;
 import net.Indyuce.mmoitems.gui.edition.recipe.RecipeTypeListGUI;
 import net.Indyuce.mmoitems.manager.*;
 import net.Indyuce.mmoitems.manager.data.PlayerDataManager;
@@ -49,7 +44,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
@@ -69,7 +63,6 @@ public class MMOItems extends MMOPlugin {
     private final TemplateManager templateManager = new TemplateManager();
     private final SkillManager skillManager = new SkillManager();
     private final RecipeManager recipeManager = new RecipeManager();
-    private final LayoutManager layoutManager = new LayoutManager();
     private final TypeManager typeManager = new TypeManager();
     private final ItemManager itemManager = new ItemManager();
     private final PlayerInventoryHandler inventory = new PlayerInventoryHandler();
@@ -119,7 +112,7 @@ public class MMOItems extends MMOPlugin {
                 new WorldEditSupport();
                 getLogger().log(Level.INFO, "挂钩至 WorldEdit");
             } catch (Exception exception) {
-                getLogger().log(Level.WARNING, "无法初始化 WorldEdit 7 支持: ", exception);
+                getLogger().log(Level.SEVERE, "无法初始化 WorldEdit 7 支持: ", exception);
             }
         });
 
@@ -127,17 +120,17 @@ public class MMOItems extends MMOPlugin {
         saveDefaultConfig();
         configManager = new ConfigManager();
 
-        statManager.loadInternalStats();
+        statManager.loadBuiltins();
         typeManager.reload(false);
         templateManager.preloadObjects();
 
         PluginUtils.isDependencyPresent("MMOCore", u -> new MMOCoreMMOLoader());
         PluginUtils.isDependencyPresent("mcMMO", u -> statManager.register(McMMOHook.disableMcMMORepair));
-        PluginUtils.hookDependencyIfPresent("AdvancedEnchantments", u -> {
+        PluginUtils.hookDependencyIfPresent("AdvancedEnchantments", true, u -> {
             statManager.register(AdvancedEnchantmentsHook.ADVANCED_ENCHANTMENTS);
             statManager.register(AdvancedEnchantmentsHook.DISABLE_ADVANCED_ENCHANTMENTS);
         });
-        PluginUtils.hookDependencyIfPresent("MythicEnchants", u -> enchantPlugins.add(new MythicEnchantsSupport()));
+        PluginUtils.hookDependencyIfPresent("MythicEnchants", true, plugin -> enchantPlugins.add(new MythicEnchantsSupport(plugin)));
         PluginUtils.isDependencyPresent("Heroes", u -> {
             statManager.register(HeroesHook.MAX_STAMINA);
             statManager.register(HeroesHook.REQUIRED_SECONDARY_HERO_LEVEL);
@@ -164,12 +157,21 @@ public class MMOItems extends MMOPlugin {
         }
 
         // registering here so the stats will load with the templates
-        PluginUtils.hookDependencyIfPresent("MythicMobs", unused -> {
+        PluginUtils.hookDependencyIfPresent("MythicMobs", true, unused -> {
             new MythicMobsCompatibility();
             if (getConfig().getBoolean("lootsplosion.enabled"))
                 Bukkit.getPluginManager().registerEvents(new LootsplosionListener(), this);
         });
-        PluginUtils.hookDependencyIfPresent("MMOInventory", unused -> new MMOInventorySupport());
+        PluginUtils.hookDependencyIfPresent("ItemsAdder", true, unused -> {
+            new ItemsAdderCompatibility();
+        });
+        PluginUtils.hookDependencyIfPresent("Oraxen", true, unused -> {
+            new OraxenCompatibility();
+        });
+        PluginUtils.hookDependencyIfPresent("Nexo", true, unused -> {
+            new NexoCompatibility();
+        });
+        PluginUtils.hookDependencyIfPresent("MMOInventory", true, unused -> new MMOInventorySupport());
 
         // This needs to be before modifier registration (MMOCore)
         findRpgPlugins();
@@ -190,10 +192,9 @@ public class MMOItems extends MMOPlugin {
         blockManager = new BlockManager();
         statManager.reload(false);
 
-        PluginUtils.hookDependencyIfPresent("Vault", u -> vaultSupport = new VaultSupport());
+        PluginUtils.hookDependencyIfPresent("Vault", true, u -> vaultSupport = new VaultSupport());
 
         getLogger().log(Level.INFO, "正在加载制作站, 请稍候..");
-        layoutManager.reload();
         stationRecipeManager.reload();
 
         // This ones are not implementing Reloadable
@@ -225,27 +226,24 @@ public class MMOItems extends MMOPlugin {
          * of items to search for when doing inventory updates.
          */
         getInventory().register(new DefaultPlayerInventory());
-        PluginUtils.hookDependencyIfPresent("RPGInventory", unused -> getInventory().register(new RPGInventoryHook()));
+        PluginUtils.hookDependencyIfPresent("RPGInventory", true, unused -> getInventory().register(new RPGInventoryHook()));
         if (MMOItems.plugin.getConfig().getBoolean("iterate-whole-inventory"))
             getInventory().register(new OrnamentPlayerInventory());
 
-        PluginUtils.hookDependencyIfPresent("CrazyEnchantments", unused -> getStats().register(new CrazyEnchantsStat()));
-        PluginUtils.hookDependencyIfPresent("AdvancedEnchantments", unused -> Bukkit.getPluginManager().registerEvents(new AdvancedEnchantmentsHook(), this));
-        PluginUtils.hookDependencyIfPresent("PlaceholderAPI", unused -> new MMOItemsPlaceholders().register());
+        PluginUtils.hookDependencyIfPresent("CrazyEnchantments", true, unused -> getStats().register(new CrazyEnchantsStat()));
+        PluginUtils.hookDependencyIfPresent("AdvancedEnchantments", true, plugin -> Bukkit.getPluginManager().registerEvents(new AdvancedEnchantmentsHook(), this));
+        PluginUtils.hookDependencyIfPresent("PlaceholderAPI", true, unused -> new MMOItemsPlaceholders().register());
 
-        if (Bukkit.getPluginManager().getPlugin("BossShopPro") != null) {
-            getLogger().log(Level.INFO, "挂钩至 BossShopPro");
-            (new BukkitRunnable() {
-                public void run() {
-                    //noinspection ProhibitedExceptionCaught
-                    try {
-                        new MMOItemsRewardTypes().register();
-                    } catch (NullPointerException ignored) {
-                        getLogger().log(Level.WARNING, "无法挂勾到 BossShopPro");
-                    }
+        PluginUtils.hookDependencyIfPresent("BossShopPro", true, plugin -> new BukkitRunnable() {
+            public void run() {
+                //noinspection ProhibitedExceptionCaught
+                try {
+                    new MMOItemsRewardTypes().register();
+                } catch (NullPointerException ignored) {
+                    getLogger().log(Level.SEVERE, "无法挂勾到 BossShopPro");
                 }
-            }).runTaskLater(this, 1L);
-        }
+            }
+        }.runTaskLater(this, 1L));
 
 		/*if (Bukkit.getPluginManager().getPlugin("Denizen") != null) {
 			new DenizenHook();
@@ -281,9 +279,6 @@ public class MMOItems extends MMOPlugin {
         // Drop abandoned items
         DeathItemsHandler.getActive().forEach(DeathItemsHandler::dropItems);
 
-        // Close inventories
-        UtilityMethods.closeOpenViewsOfType(PluginInventory.class);
-
         // WorldGen
         this.worldGenManager.unload();
     }
@@ -298,10 +293,6 @@ public class MMOItems extends MMOPlugin {
 
     public CraftingManager getCrafting() {
         return stationRecipeManager;
-    }
-
-    public LayoutManager getLayouts() {
-        return layoutManager;
     }
 
     public SetManager getSets() {
@@ -356,7 +347,7 @@ public class MMOItems extends MMOPlugin {
                     }
 
                 } catch (Exception exception) {
-                    MMOItems.plugin.getLogger().log(Level.WARNING, "无法初始化 RPG 插件兼容性 " + enumPlugin.getName() + ":");
+                    MMOItems.plugin.getLogger().log(Level.SEVERE, "无法初始化 RPG 插件兼容性 " + enumPlugin.getName() + ":");
                     exception.printStackTrace();
                 }
 
@@ -378,7 +369,7 @@ public class MMOItems extends MMOPlugin {
 
         // Unregister old events
         if (getMainRPG() instanceof Listener && isEnabled())
-            HandlerList.unregisterAll((Plugin) getMainRPG());
+            HandlerList.unregisterAll((Listener) getMainRPG());
 
         rpgPlugins.add(0, handler);
         getLogger().log(Level.INFO, "正在使用 " + handler.getClass().getSimpleName() + " 作为 RPG 提供");
@@ -420,10 +411,10 @@ public class MMOItems extends MMOPlugin {
      *
      * @param value The player inventory subclass
      * @deprecated Rather than setting this to the only inventory MMOItems will
-     * search equipment within, you must add your inventory to the
-     * handler with <code>getInventory().register()</code>. This method
-     * will clear all other PlayerInventories for now, as to keep
-     * backwards compatibility.
+     *         search equipment within, you must add your inventory to the
+     *         handler with <code>getInventory().register()</code>. This method
+     *         will clear all other PlayerInventories for now, as to keep
+     *         backwards compatibility.
      */
     @Deprecated
     public void setPlayerInventory(PlayerInventory value) {
@@ -533,9 +524,9 @@ public class MMOItems extends MMOPlugin {
 
     /**
      * @return Generates an item given an item template. The item level will
-     * scale according to the player RPG level if the template has the
-     * 'level-item' option. The item will pick a random tier if the
-     * template has the 'tiered' option
+     *         scale according to the player RPG level if the template has the
+     *         'level-item' option. The item will pick a random tier if the
+     *         template has the 'tiered' option
      */
     @Nullable
     public MMOItem getMMOItem(@Nullable Type type, @Nullable String id, @Nullable PlayerData player) {
@@ -553,9 +544,9 @@ public class MMOItems extends MMOPlugin {
 
     /**
      * @return Generates an item given an item template. The item level will
-     * scale according to the player RPG level if the template has the
-     * 'level-item' option. The item will pick a random tier if the
-     * template has the 'tiered' option
+     *         scale according to the player RPG level if the template has the
+     *         'level-item' option. The item will pick a random tier if the
+     *         template has the 'tiered' option
      */
     @Nullable
     public ItemStack getItem(@Nullable Type type, @Nullable String id, @NotNull PlayerData player) {
@@ -572,7 +563,7 @@ public class MMOItems extends MMOPlugin {
      * @param itemLevel The desired item level
      * @param itemTier  The desired item tier, can be null
      * @return Generates an item given an item template with a
-     * specific item level and item tier
+     *         specific item level and item tier
      */
     @Nullable
     public MMOItem getMMOItem(@Nullable Type type, @Nullable String id, int itemLevel, @Nullable ItemTier itemTier) {
@@ -592,7 +583,7 @@ public class MMOItems extends MMOPlugin {
      * @param itemLevel The desired item level
      * @param itemTier  The desired item tier, can be null
      * @return Generates an item given an item template with a
-     * specific item level and item tier
+     *         specific item level and item tier
      */
     @Nullable
     public ItemStack getItem(@Nullable Type type, @Nullable String id, int itemLevel, @Nullable ItemTier itemTier) {
@@ -607,10 +598,10 @@ public class MMOItems extends MMOPlugin {
 
     /**
      * @return Generates an item given an item template. The item level will be
-     * 0 and the item will have no item tier unless one is specified in
-     * the base item data.
-     * <p></p>
-     * Will return <code>null</code> if such MMOItem does not exist.
+     *         0 and the item will have no item tier unless one is specified in
+     *         the base item data.
+     *         <p></p>
+     *         Will return <code>null</code> if such MMOItem does not exist.
      */
     @Nullable
     public MMOItem getMMOItem(@Nullable Type type, @Nullable String id) {
@@ -619,10 +610,10 @@ public class MMOItems extends MMOPlugin {
 
     /**
      * @return Generates an item given an item template. The item level will be
-     * 0 and the item will have no item tier unless one is specified in
-     * the base item data.
-     * <p></p>
-     * Will return <code>null</code> if such MMOItem does not exist.
+     *         0 and the item will have no item tier unless one is specified in
+     *         the base item data.
+     *         <p></p>
+     *         Will return <code>null</code> if such MMOItem does not exist.
      */
 
     @Nullable
@@ -635,10 +626,10 @@ public class MMOItems extends MMOPlugin {
 
     /**
      * @return Generates an item given an item template. The item level will be
-     * 0 and the item will have no item tier unless one is specified in
-     * the base item data.
-     * <p></p>
-     * Will return <code>null</code> if such MMOItem does not exist.
+     *         0 and the item will have no item tier unless one is specified in
+     *         the base item data.
+     *         <p></p>
+     *         Will return <code>null</code> if such MMOItem does not exist.
      */
     @Nullable
     public ItemStack getItem(@Nullable Type type, @Nullable String id) {

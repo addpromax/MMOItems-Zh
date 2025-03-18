@@ -4,14 +4,18 @@ import io.lumine.mythicenchants.MythicEnchants;
 import io.lumine.mythicenchants.enchants.MythicEnchant;
 import io.lumine.mythicenchants.util.LoreParser;
 import net.Indyuce.mmoitems.api.item.build.ItemStackBuilder;
-import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class MythicEnchantsSupport implements EnchantPlugin<MythicEnchant> {
-    private final MythicEnchants manager = (MythicEnchants) Bukkit.getPluginManager().getPlugin("MythicEnchants");
+    private final MythicEnchants manager;
+
+    public MythicEnchantsSupport(Plugin plugin) {
+        manager = (MythicEnchants) plugin;
+    }
 
     @NotNull
     @Override

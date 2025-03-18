@@ -1,6 +1,7 @@
 package net.Indyuce.mmoitems.api.interaction;
 
 import io.lumine.mythic.lib.api.item.NBTItem;
+import io.lumine.mythic.lib.version.Sounds;
 import net.Indyuce.mmoitems.ItemStats;
 import net.Indyuce.mmoitems.api.Type;
 import net.Indyuce.mmoitems.api.event.item.ApplyGemStoneEvent;
@@ -20,7 +21,6 @@ import net.Indyuce.mmoitems.stat.type.StatHistory;
 import net.Indyuce.mmoitems.util.MMOUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -81,7 +81,7 @@ public class GemStone extends UseItem {
         // Return if gem stone application failure
         if (called.getResult() == ResultType.FAILURE) {
             if (!silent) {
-                player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1, 1);
+                player.playSound(player.getLocation(), Sounds.ENTITY_ITEM_BREAK, 1, 1);
                 Message.GEM_STONE_BROKE.format(ChatColor.RED, "#gem#", MMOUtils.getDisplayName(getItem()), "#item#", itemName).send(player);
             }
 
@@ -133,7 +133,7 @@ public class GemStone extends UseItem {
         }
 
         if (!silent) {
-            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 2);
+            player.playSound(player.getLocation(), Sounds.ENTITY_PLAYER_LEVELUP, 1, 2);
             Message.GEM_STONE_APPLIED.format(ChatColor.YELLOW, "#gem#", MMOUtils.getDisplayName(getItem()), "#item#", itemName).send(player);
         }
 

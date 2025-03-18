@@ -5,6 +5,7 @@ import net.Indyuce.mmoitems.api.item.build.ItemStackBuilder;
 import net.Indyuce.mmoitems.api.item.mmoitem.ReadMMOItem;
 import net.Indyuce.mmoitems.api.item.template.MMOItemTemplate;
 import net.Indyuce.mmoitems.api.util.NumericStatFormula;
+import net.Indyuce.mmoitems.stat.annotation.HasCategory;
 import net.Indyuce.mmoitems.stat.data.DoubleData;
 import net.Indyuce.mmoitems.stat.type.DoubleStat;
 import org.bukkit.Material;
@@ -16,6 +17,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+@HasCategory(cat = "template_option")
 public class BrowserDisplayIDX extends DoubleStat {
     public BrowserDisplayIDX() {
         super("BROWSER_IDX", Material.GHAST_TEAR, "浏览索引", new String[] {"用于在GUI界面,", "mmoitems 浏览器中整齐地 §a/ 将类似的物品显示在一起", "", "将具有相同索引的物品分组"}, new String[0]);

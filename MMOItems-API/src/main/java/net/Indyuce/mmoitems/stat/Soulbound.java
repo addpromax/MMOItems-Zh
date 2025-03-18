@@ -1,10 +1,11 @@
 package net.Indyuce.mmoitems.stat;
 
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import io.lumine.mythic.lib.api.item.ItemTag;
 import io.lumine.mythic.lib.api.item.NBTItem;
 import io.lumine.mythic.lib.api.item.SupportedNBTTagValues;
+import io.lumine.mythic.lib.gson.JsonParser;
+import io.lumine.mythic.lib.gson.JsonSyntaxException;
+import io.lumine.mythic.lib.version.Sounds;
 import net.Indyuce.mmoitems.ItemStats;
 import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.item.build.ItemStackBuilder;
@@ -12,6 +13,7 @@ import net.Indyuce.mmoitems.api.item.mmoitem.ReadMMOItem;
 import net.Indyuce.mmoitems.api.player.RPGPlayer;
 import net.Indyuce.mmoitems.api.util.message.Message;
 import net.Indyuce.mmoitems.gui.edition.EditionInventory;
+import net.Indyuce.mmoitems.stat.annotation.HasCategory;
 import net.Indyuce.mmoitems.stat.data.SoulboundData;
 import net.Indyuce.mmoitems.stat.data.random.RandomStatData;
 import net.Indyuce.mmoitems.stat.data.type.StatData;
@@ -22,7 +24,6 @@ import net.Indyuce.mmoitems.util.MMOUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,6 +34,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+@HasCategory(cat = "soulbound")
 public class Soulbound extends ItemStat<RandomStatData<SoulboundData>, SoulboundData> implements InternalStat, ItemRestriction {
 	public Soulbound() {
 		super("SOULBOUND", Material.ENDER_EYE, "灵魂绑定", new String[0], new String[0]);
@@ -64,9 +66,8 @@ public class Soulbound extends ItemStat<RandomStatData<SoulboundData>, Soulbound
 		item.addItemTag(getAppliedNBT(data));
 
 		// Lore stuff
-		String formattedLoreTag = Message.SOULBOUND_ITEM_LORE.getUpdated().replace("#player#", ((SoulboundData) data).getName()).replace("#level#",
-				MMOUtils.intToRoman(data.getLevel()));
-		item.getLore().insert("soulbound", formattedLoreTag.split(Pattern.quote("//")));
+        String formattedLoreTag = Message.SOULBOUND_ITEM_LORE.getFormatted().replace("#player#", data.getName()).replace("#level#", MMOUtils.intToRoman(data.getLevel()));
+        item.getLore().insert("soulbound", formattedLoreTag.split(Pattern.quote("//")));
 	}
 
 	@NotNull
@@ -115,7 +116,7 @@ public class Soulbound extends ItemStat<RandomStatData<SoulboundData>, Soulbound
 			if (message) {
 				int level = new JsonParser().parse(item.getString(ItemStats.SOULBOUND.getNBTPath())).getAsJsonObject().get("Level").getAsInt();
 				Message.SOULBOUND_RESTRICTION.format(ChatColor.RED).send(player.getPlayer());
-				player.getPlayer().playSound(player.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1.5f);
+				player.getPlayer().playSound(player.getPlayer().getLocation(), Sounds.ENTITY_VILLAGER_NO, 1, 1.5f);
 				player.getPlayer()
 						.damage(MMOItems.plugin.getLanguage().soulboundBaseDamage + level * MMOItems.plugin.getLanguage().soulboundPerLvlDamage);
 			}

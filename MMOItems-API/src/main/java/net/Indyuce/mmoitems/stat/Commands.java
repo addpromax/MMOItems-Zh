@@ -1,9 +1,9 @@
 package net.Indyuce.mmoitems.stat;
 
-import com.google.gson.*;
 import io.lumine.mythic.lib.api.item.ItemTag;
 import io.lumine.mythic.lib.api.item.SupportedNBTTagValues;
 import io.lumine.mythic.lib.api.util.AltChar;
+import io.lumine.mythic.lib.gson.*;
 import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.item.build.ItemStackBuilder;
 import net.Indyuce.mmoitems.api.item.mmoitem.ReadMMOItem;
@@ -51,7 +51,7 @@ public class Commands extends ItemStat<CommandListData, CommandListData> {
 
     @Override
     public void whenClicked(@NotNull EditionInventory inv, @NotNull InventoryClickEvent event) {
-        new CommandListEdition(inv.getPlayer(), inv.getEdited()).open(inv);
+        new CommandListEdition(inv.getNavigator(), inv.getEdited()).open(inv);
     }
 
     @Override

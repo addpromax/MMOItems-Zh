@@ -1,10 +1,10 @@
 package net.Indyuce.mmoitems.gui.edition.recipe.button;
 
+import io.lumine.mythic.lib.version.Sounds;
 import net.Indyuce.mmoitems.api.edition.StatEdition;
 import net.Indyuce.mmoitems.gui.edition.EditionInventory;
 import net.Indyuce.mmoitems.gui.edition.recipe.gui.RecipeEditorGUI;
 import net.Indyuce.mmoitems.stat.type.ItemStat;
-import org.bukkit.Sound;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -92,5 +92,5 @@ public abstract class RecipeButtonAction {
     /**
      * Plays a clicking sound
      */
-    public void clickSFX() { getInv().getPlayer().playSound(getInv().getPlayer().getLocation(), Sound.UI_BUTTON_CLICK, 1, 1); }
+    public void clickSFX() { getInv().getPlayer().playSound(getInv().getPlayer().getLocation(), Sounds.UI_BUTTON_CLICK, 1, 1); }
 }

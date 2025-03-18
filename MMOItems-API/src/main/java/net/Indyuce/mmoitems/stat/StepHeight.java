@@ -1,13 +1,17 @@
 package net.Indyuce.mmoitems.stat;
 
+import net.Indyuce.mmoitems.stat.annotation.HasCategory;
 import net.Indyuce.mmoitems.stat.type.DoubleStat;
-import net.Indyuce.mmoitems.util.VersionDependant;
+import net.Indyuce.mmoitems.stat.annotation.VersionDependant;
 import org.bukkit.Material;
 
+@HasCategory(cat = "vanilla_attribute")
 @VersionDependant(version = {1, 20, 5})
 public class StepHeight extends DoubleStat {
     public StepHeight() {
-        super("STEP_HEIGHT", Material.GOLDEN_BOOTS,
-                "坡度", new String[]{"行走或冲刺时，不需要跳跃就可以越过","的额外方块数。默认值是0.6，即仅高于一个半砖。"});
+        super("STEP_HEIGHT",
+                Material.STONE_SLAB,
+                "Step Height",
+                "决定生物无需跳跃即可越过的最大方块高度。默认值为0.6，合法范围是0到10。");
     }
 }

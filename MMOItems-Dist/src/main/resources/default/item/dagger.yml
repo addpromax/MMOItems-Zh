@@ -179,8 +179,8 @@ SNEAKY_DAGGER:
     lore:
       - §7这把匕首十分神秘。
     tier: UNCOMMON
-    attack-damage: 5.0
-    attack-speed: 2.2
+    attack-damage: 11.0
+    attack-speed: 0.9
     critical-strike-chance:
       base: 9.0
       scale: 0.1
@@ -198,3 +198,4 @@ SNEAKY_DAGGER:
         mode: ATTACK
         cooldown: 3.0
         extra: 50.0
+    sneaking-speed: 2.0

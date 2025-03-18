@@ -23,7 +23,7 @@ public class UnidentifyCommandTreeNode extends CommandTreeNode {
 		}
 
 		Player player = (Player) sender;
-		NBTItem item = MythicLib.plugin.getVersion().getWrapper().getNBTItem(player.getInventory().getItemInMainHand());
+		NBTItem item = NBTItem.get(player.getInventory().getItemInMainHand());
 		if (item.getType() == null) {
 			sender.sendMessage(MMOItems.plugin.getPrefix() + "Couldn't unidentify the item you are holding.");
 			return CommandResult.FAILURE;

@@ -32,8 +32,10 @@ public class ItemDamage extends DoubleStat implements GemStoneStat {
 
     @Override
     public void whenApplied(@NotNull ItemStackBuilder item, @NotNull DoubleData data) {
-        if (item.getMeta() instanceof Damageable)
-            ((Damageable) item.getMeta()).setDamage((int) data.getValue());
+        if (item.getMeta() instanceof Damageable) {
+            final int dmg = (int) data.getValue();
+            if (dmg > 0) ((Damageable) item.getMeta()).setDamage(dmg);
+        }
     }
 
     @Override
@@ -53,8 +55,10 @@ public class ItemDamage extends DoubleStat implements GemStoneStat {
 
     @Override
     public void whenLoaded(@NotNull ReadMMOItem mmoitem) {
-        if (mmoitem.getNBT().getItem().getItemMeta() instanceof Damageable)
-            mmoitem.setData(ItemStats.ITEM_DAMAGE, new DoubleData(((Damageable) mmoitem.getNBT().getItem().getItemMeta()).getDamage()));
+        if (mmoitem.getNBT().getItem().getItemMeta() instanceof Damageable) {
+            final int dmg = ((Damageable) mmoitem.getNBT().getItem().getItemMeta()).getDamage();
+            if (dmg > 0) mmoitem.setData(ItemStats.ITEM_DAMAGE, new DoubleData(dmg));
+        }
     }
 
     /**

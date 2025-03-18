@@ -8,11 +8,13 @@ import io.lumine.mythic.lib.api.item.NBTItem;
 import io.lumine.mythic.lib.api.item.SupportedNBTTagValues;
 import io.lumine.mythic.lib.skill.trigger.TriggerType;
 import io.lumine.mythic.lib.util.annotation.BackwardsCompatibility;
+import io.lumine.mythic.lib.version.Attributes;
 import io.lumine.mythic.lib.version.VPotionEffectType;
+import net.Indyuce.mmoitems.ItemStats;
 import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.Type;
+import org.apache.commons.lang.Validate;
 import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -20,13 +22,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.Function;
 
 @SuppressWarnings("unused")
 public class MMOUtils {
@@ -35,7 +41,95 @@ public class MMOUtils {
     }
 
     public static boolean isColorable(@NotNull Particle particle) {
-        return particle.getDataType() == Particle.DustOptions.class;
+        return particle.getDataType() == Particle.DustOptions.class || particle.getDataType() == Color.class;
+    }
+
+    /**
+     * Catch exception with a more friendly error message
+     */
+    @NotNull
+    public static <T> T friendlyValueOf(Function<String, T> valueOfFunction, String input, String messageFormat) {
+        input = UtilityMethods.enumName(input);
+        try {
+            return valueOfFunction.apply(input);
+        } catch (Exception exception) {
+            throw new RuntimeException(String.format(messageFormat, input));
+        }
+    }
+
+    public static <T> ListIterator<T> backwards(@NotNull List<T> list) {
+        return list.listIterator(list.size());
+    }
+
+    public static <T> void addAllBackwards(@NotNull List<T> base, List<T> arg) {
+        ListIterator<T> iterator = arg.listIterator(arg.size());
+        while (iterator.hasPrevious()) {
+            base.add(iterator.previous());
+        }
+    }
+
+    @NotNull
+    @BackwardsCompatibility(version = "v1_19_r2")
+    public static EquipmentSlot getHand(PlayerItemConsumeEvent event) {
+        try {
+            return event.getHand();
+        } catch (Throwable throwable) {
+            final ItemStack itemInMainHand = event.getPlayer().getInventory().getItemInMainHand();
+            return event.getItem().isSimilar(itemInMainHand) ? EquipmentSlot.HAND : EquipmentSlot.OFF_HAND;
+        }
+    }
+
+    @NotNull
+    @BackwardsCompatibility(version = "v1_15_r1")
+    public static EquipmentSlot getHand(@NotNull EntityShootBowEvent event, @NotNull Player player) {
+        try {
+            return event.getHand();
+        } catch (Exception exception) {
+            final ItemStack itemInMainHand = player.getInventory().getItemInMainHand();
+            return itemInMainHand.isSimilar(event.getBow()) ? EquipmentSlot.HAND : EquipmentSlot.OFF_HAND;
+        }
+    }
+
+    public static String[] trimString(int charactersPerLine, @NotNull String... inputs) {
+        List<String> list = new ArrayList<>();
+
+        for (String input : inputs) {
+            if (input.length() <= charactersPerLine) {
+                list.add(input);
+                continue;
+            }
+
+            StringBuilder currentLine = new StringBuilder();
+
+            for (String word : input.split(" ")) {
+                if (!currentLine.isEmpty()) currentLine.append(" ");
+                currentLine.append(word);
+                if (currentLine.length() > charactersPerLine || word.endsWith("\n")) {
+                    list.add(currentLine.toString()); // Return line
+                    currentLine.setLength(0); // Empty current line
+                }
+            }
+
+            // Add last line (sometimes not necessary)
+            if (!currentLine.isEmpty()) list.add(currentLine.toString());
+        }
+
+        return list.toArray(new String[0]);
+    }
+
+    @NotNull
+    public static ItemStack readIcon(@NotNull String stringInput) {
+        Validate.notNull(stringInput, "Input must not be null");
+        final String[] split = stringInput.split(":");
+
+        final ItemStack stack = new ItemStack(Material.valueOf(UtilityMethods.enumName(split[0])));
+        if (split.length > 1) {
+            final ItemMeta meta = stack.getItemMeta();
+            meta.setCustomModelData(Integer.parseInt(split[1]));
+            stack.setItemMeta(meta);
+        }
+
+        return stack;
     }
 
     @BackwardsCompatibility(version = "1.21")
@@ -115,26 +209,10 @@ public class MMOUtils {
         if (item == null || item.getType() == Material.AIR) return 0;
 
         final NBTItem nbt = NBTItem.get(item);
-        if (nbt.hasTag("MMOITEMS_PICKAXE_POWER")) return nbt.getInteger("MMOITEMS_PICKAXE_POWER");
+        int nbtPickaxePower = nbt.getInteger(ItemStats.PICKAXE_POWER.getNBTPath());
+        if (nbtPickaxePower > 0) return nbtPickaxePower;
 
-        switch (item.getType().name()) {
-            case "WOODEN_PICKAXE":
-            case "WOOD_PICKAXE":
-                return 5;
-            case "STONE_PICKAXE":
-                return 10;
-            case "GOLDEN_PICKAXE":
-            case "GOLD_PICKAXE":
-                return 15;
-            case "IRON_PICKAXE":
-                return 20;
-            case "DIAMOND_PICKAXE":
-                return 25;
-            case "NETHERITE_PICKAXE":
-                return 30;
-            default:
-                return 0;
-        }
+        return MMOItems.plugin.getLanguage().getDefaultPickaxePower(item);
     }
 
     /**
@@ -281,7 +359,7 @@ public class MMOUtils {
      *
      * @param type Potion effect type
      * @return The duration that MMOItems should be using to give player
-     * "permanent" potion effects, depending on the potion effect type
+     *         "permanent" potion effects, depending on the potion effect type
      */
     public static int getEffectDuration(PotionEffectType type) {
         return type.equals(PotionEffectType.NIGHT_VISION) || type.equals(VPotionEffectType.NAUSEA.get()) ? 260 : type.equals(PotionEffectType.BLINDNESS) ? 140 : 100;
@@ -304,7 +382,7 @@ public class MMOUtils {
      * @param item The item to check
      * @param lore Whether or not MI should check for an item lore
      * @return If the item is not null, has an itemMeta and has a display name.
-     * If 'lore' is true, also checks if the itemMeta has a lore.
+     *         If 'lore' is true, also checks if the itemMeta has a lore.
      */
     public static boolean isMetaItem(ItemStack item, boolean lore) {
         return item != null && item.getType() != Material.AIR && item.getItemMeta() != null && item.getItemMeta().getDisplayName() != null && (!lore || item.getItemMeta().getLore() != null);
@@ -374,7 +452,7 @@ public class MMOUtils {
         if (entity.isDead() || entity.getHealth() <= 0) return;
         if (heal < 0 && !allowNegatives) return;
 
-        final double maxHealth = entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
+        final double maxHealth = entity.getAttribute(Attributes.MAX_HEALTH).getValue();
         entity.setHealth(Math.min(maxHealth, entity.getHealth() + heal));
     }
     //endregion
@@ -439,10 +517,10 @@ public class MMOUtils {
     /**
      * @param loc Where we are looking for nearby entities
      * @return List of all entities surrounding a location. This method loops
-     * through the 9 surrounding chunks and collect all entities from
-     * them. This list can be cached and used multiple times in the same
-     * tick for projectile based spells which need to run entity
-     * checkups
+     *         through the 9 surrounding chunks and collect all entities from
+     *         them. This list can be cached and used multiple times in the same
+     *         tick for projectile based spells which need to run entity
+     *         checkups
      */
     public static List<Entity> getNearbyChunkEntities(Location loc) {
         List<Entity> entities = new ArrayList<>();
@@ -455,11 +533,5 @@ public class MMOUtils {
                 entities.addAll(Arrays.asList(loc.getWorld().getChunkAt(cx + x, cz + z).getEntities()));
 
         return entities;
-    }
-
-    public static ItemStack readIcon(String string) throws IllegalArgumentException {
-        String[] split = string.split(":");
-        Material material = Material.valueOf(split[0].toUpperCase().replace("-", "_").replace(" ", "_"));
-        return split.length > 1 ? MythicLib.plugin.getVersion().getWrapper().textureItem(material, Integer.parseInt(split[1])) : new ItemStack(material);
     }
 }

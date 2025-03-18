@@ -3,15 +3,14 @@ package net.Indyuce.mmoitems.stat;
 import io.lumine.mythic.lib.api.item.ItemTag;
 import net.Indyuce.mmoitems.api.item.build.ItemStackBuilder;
 import net.Indyuce.mmoitems.api.util.NumericStatFormula;
+import net.Indyuce.mmoitems.stat.annotation.HasCategory;
 import net.Indyuce.mmoitems.stat.data.DoubleData;
 import net.Indyuce.mmoitems.stat.type.DoubleStat;
 import net.Indyuce.mmoitems.util.MMOUtils;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Soulbound level for consumables.
- */
+@HasCategory(cat = "soulbound")
 public class SoulboundLevel extends DoubleStat {
     public SoulboundLevel() {
         super("SOULBOUND_LEVEL", Material.ENDER_EYE, "灵魂绑定等级", new String[]{"灵魂绑定等级决定了玩家在尝试使", "用灵魂绑定物品时会受到多少伤害", "\n它还决定了打破绑定的难度."}, new String[]{"consumable"});

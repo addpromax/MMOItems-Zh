@@ -51,7 +51,7 @@ public class DropTableManager implements Listener, Reloadable {
 					EntityType type = EntityType.valueOf(key.toUpperCase().replace("-", "_").replace(" ", "_"));
 					monsters.put(type, new DropTable(config.getConfigurationSection("monsters." + key)));
 				} catch (IllegalArgumentException exception) {
-					MMOItems.plugin.getLogger().log(Level.WARNING,
+					MMOItems.plugin.getLogger().log(Level.SEVERE,
 							"Could not read drop table with mob type '" + key + "': " + exception.getMessage());
 				}
 
@@ -61,7 +61,7 @@ public class DropTableManager implements Listener, Reloadable {
 					Material material = Material.valueOf(key.toUpperCase().replace("-", "_").replace(" ", "_"));
 					blocks.put(material, new DropTable(config.getConfigurationSection("blocks." + key)));
 				} catch (IllegalArgumentException exception) {
-					MMOItems.plugin.getLogger().log(Level.WARNING,
+					MMOItems.plugin.getLogger().log(Level.SEVERE,
 							"Could not read drop table with material '" + key + "': " + exception.getMessage());
 				}
 
@@ -71,7 +71,7 @@ public class DropTableManager implements Listener, Reloadable {
 					int id = Integer.parseInt(key);
 					customBlocks.put(id, new DropTable(config.getConfigurationSection("customblocks." + key)));
 				} catch (IllegalArgumentException exception) {
-					MMOItems.plugin.getLogger().log(Level.WARNING,
+					MMOItems.plugin.getLogger().log(Level.SEVERE,
 							"Could not read drop table with custom block '" + key + "': " + exception.getMessage());
 				}
 	}
@@ -97,8 +97,7 @@ public class DropTableManager implements Listener, Reloadable {
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void blockDrops(BlockBreakEvent event) {
 		Player player = event.getPlayer();
-		if (player == null || player.getGameMode() == GameMode.CREATIVE)
-			return;
+		if (player.getGameMode() == GameMode.CREATIVE) return;
 
 		Block block = event.getBlock();
 		Optional<CustomBlock> opt = MMOItems.plugin.getCustomBlocks().getFromBlock(block.getBlockData());

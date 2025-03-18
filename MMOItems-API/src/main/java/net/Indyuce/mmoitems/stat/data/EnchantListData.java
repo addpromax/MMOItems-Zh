@@ -4,7 +4,6 @@ import net.Indyuce.mmoitems.ItemStats;
 import net.Indyuce.mmoitems.api.item.mmoitem.MMOItem;
 import net.Indyuce.mmoitems.stat.data.type.Mergeable;
 import net.Indyuce.mmoitems.stat.data.type.StatData;
-import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.NotNull;
@@ -89,7 +88,7 @@ public class EnchantListData implements StatData, Mergeable<EnchantListData> {
         final AtomicBoolean check = new AtomicBoolean();
         enchants.forEach((enchant, lvl) -> {
             if (check.get()) builder.append(",");
-            builder.append(enchant + "=" + lvl);
+            builder.append(enchant).append("=").append(lvl);
             check.set(true);
         });
         builder.append("}");
@@ -138,11 +137,7 @@ public class EnchantListData implements StatData, Mergeable<EnchantListData> {
             return;
         }
 
-        if (!mmoItem.hasData(ItemStats.ENCHANTS)) {
-            mmoItem.setData(ItemStats.ENCHANTS, new EnchantListData());
-        }
-
-        EnchantListData mmoData = (EnchantListData) mmoItem.getData(ItemStats.ENCHANTS);
+        EnchantListData mmoData = (EnchantListData) mmoItem.computeData(ItemStats.ENCHANTS);
 
         // 2: If it has data (It always has) and the amount of enchants is zero, the cached are Extraneous
         if (mmoData.getEnchants().size() == 0) {

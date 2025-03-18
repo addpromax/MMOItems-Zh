@@ -1,14 +1,13 @@
 package net.Indyuce.mmoitems.stat;
 
 import io.lumine.mythic.lib.api.item.NBTItem;
-import net.Indyuce.mmoitems.ItemStats;
+import io.lumine.mythic.lib.version.Sounds;
 import net.Indyuce.mmoitems.api.player.RPGPlayer;
 import net.Indyuce.mmoitems.api.util.message.Message;
 import net.Indyuce.mmoitems.stat.data.RequiredLevelData;
 import net.Indyuce.mmoitems.stat.type.RequiredLevelStat;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
 
 public class RequiredLevel extends RequiredLevelStat {
@@ -31,7 +30,7 @@ public class RequiredLevel extends RequiredLevelStat {
 
         if (message) {
             Message.NOT_ENOUGH_LEVELS.format(ChatColor.RED).send(player.getPlayer());
-            player.getPlayer().playSound(player.getPlayer().getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1.5f);
+            player.getPlayer().playSound(player.getPlayer().getLocation(), Sounds.ENTITY_VILLAGER_NO, 1, 1.5f);
         }
         return false;
     }

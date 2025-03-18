@@ -38,11 +38,11 @@ public class PickaxePower extends DoubleStat {
         if (techMinimum < 0 && !handleNegativeStats()) {
             techMinimum = 0;
         }
-        if (techMinimum < ((NumericStatFormula) templateData).getBase() - ((NumericStatFormula) templateData).getMaxSpread()) {
-            techMinimum = ((NumericStatFormula) templateData).getBase() - ((NumericStatFormula) templateData).getMaxSpread();
+        if (techMinimum <  templateData.getBase() -  templateData.getMaxSpread()) {
+            techMinimum = templateData.getBase() - templateData.getMaxSpread();
         }
-        if (techMaximum > ((NumericStatFormula) templateData).getBase() + ((NumericStatFormula) templateData).getMaxSpread()) {
-            techMaximum = ((NumericStatFormula) templateData).getBase() + ((NumericStatFormula) templateData).getMaxSpread();
+        if (techMaximum > templateData.getBase() +  templateData.getMaxSpread()) {
+            techMaximum = templateData.getBase() +  templateData.getMaxSpread();
         }
 
         // Add NBT Path

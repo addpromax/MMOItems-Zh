@@ -33,7 +33,7 @@ public class DropTable {
 				subtables.put(key, new Subtable(config.getConfigurationSection(key)));
 
 			} catch (IllegalArgumentException exception) {
-				MMOItems.plugin.getLogger().log(Level.WARNING, "Could not read subtable '" + key + "' from drop table '" + config.getName() + "': " + exception.getMessage());
+				MMOItems.plugin.getLogger().log(Level.SEVERE, "Could not read subtable '" + key + "' from drop table '" + config.getName() + "': " + exception.getMessage());
 			}
 
 		Validate.notEmpty(subtablesList, "Your droptable must contain at least one subtable");
@@ -51,7 +51,7 @@ public class DropTable {
 			if (dropItem.rollDrop()) {
 				ItemStack drop = dropItem.getItem(player);
 				if (drop == null)
-					MMOItems.plugin.getLogger().log(Level.WARNING, "Couldn't read the subtable item " + dropItem.getKey());
+					MMOItems.plugin.getLogger().log(Level.SEVERE, "Couldn't read the subtable item " + dropItem.getKey());
 				else
 					dropped.add(drop);
 			}

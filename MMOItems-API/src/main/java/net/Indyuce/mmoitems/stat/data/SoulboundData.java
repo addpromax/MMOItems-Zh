@@ -1,6 +1,6 @@
 package net.Indyuce.mmoitems.stat.data;
 
-import com.google.gson.JsonObject;
+import io.lumine.mythic.lib.gson.JsonObject;
 import net.Indyuce.mmoitems.stat.data.type.StatData;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;

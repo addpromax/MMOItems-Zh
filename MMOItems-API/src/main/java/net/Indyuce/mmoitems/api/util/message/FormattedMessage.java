@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class FormattedMessage {
     private final boolean actionBar;
@@ -22,8 +23,8 @@ public class FormattedMessage {
      *
      * @param message Unformatted message
      */
-    public FormattedMessage(Message message) {
-        this.message = message.getUpdated();
+    public FormattedMessage(@NotNull Message message) {
+        this.message = message.getRaw();
         this.actionBar = MMOItems.plugin.getConfig().getBoolean("action-bar-display." + message.getActionBarConfigPath());
     }
 
@@ -40,8 +41,10 @@ public class FormattedMessage {
     }
 
     @NotNull
-    public FormattedMessage format(ChatColor prefix, String... toReplace) {
-        message = prefix + message;
+    public FormattedMessage format(@Nullable ChatColor prefix, @NotNull String... toReplace) {
+        if (message.isEmpty()) return this;
+
+        if (prefix != null) message = prefix + message;
         for (int j = 0; j < toReplace.length; j += 2)
             message = message.replace(toReplace[j], toReplace[j + 1]);
         return this;
@@ -54,16 +57,20 @@ public class FormattedMessage {
      * @param player Player receiving the message
      */
     public void send(Player player) {
-        if (ChatColor.stripColor(message).isEmpty())
-            return;
+        if (message.isEmpty()) return;
 
+        // Finally apply color
+        message = MythicLib.plugin.parseColors(message);
+
+        // Send to action bar
         if (actionBar) {
             if (Bukkit.getPluginManager().isPluginEnabled("MMOCore"))
                 PlayerData.get(player).setLastActivity(PlayerActivity.ACTION_BAR_MESSAGE);
-
             MythicLib.plugin.getVersion().getWrapper().sendActionBar(player, message);
-        } else
-            player.sendMessage(message);
+        }
+
+        // Send to chat
+        else player.sendMessage(message);
     }
 
     @Override

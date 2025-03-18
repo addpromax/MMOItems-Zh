@@ -33,7 +33,7 @@ public class LoreFormatManager implements Reloadable {
                 Validate.isTrue(config.isList("lore-format"), "Invalid lore-format! (" + file.getName() + ")");
                 formats.put(file.getName().substring(0, file.getName().length() - 4), config.getStringList("lore-format"));
             } catch (IllegalArgumentException exception) {
-                MMOItems.plugin.getLogger().log(Level.WARNING, "Could not load layout '" + file.getName() + "': " + exception.getMessage());
+                MMOItems.plugin.getLogger().log(Level.SEVERE, "Could not load layout '" + file.getName() + "': " + exception.getMessage());
             }
 
         final ConfigurationSection tooltipsConfig = new ConfigFile("tooltips").getConfig();
@@ -42,7 +42,7 @@ public class LoreFormatManager implements Reloadable {
                 final TooltipTexture tooltip = new TooltipTexture(tooltipsConfig.getConfigurationSection(key));
                 tooltips.put(tooltip.getId(), tooltip);
             } catch (Exception exception) {
-                MMOItems.plugin.getLogger().log(Level.WARNING, "Could not load tooltip '" + key + "': " + exception.getMessage());
+                MMOItems.plugin.getLogger().log(Level.SEVERE, "Could not load tooltip '" + key + "': " + exception.getMessage());
             }
     }
 

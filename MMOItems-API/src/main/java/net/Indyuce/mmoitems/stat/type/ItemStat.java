@@ -8,9 +8,10 @@ import net.Indyuce.mmoitems.api.Type;
 import net.Indyuce.mmoitems.api.item.build.ItemStackBuilder;
 import net.Indyuce.mmoitems.api.item.mmoitem.ReadMMOItem;
 import net.Indyuce.mmoitems.gui.edition.EditionInventory;
+import net.Indyuce.mmoitems.stat.category.StatCategory;
 import net.Indyuce.mmoitems.stat.data.random.RandomStatData;
 import net.Indyuce.mmoitems.stat.data.type.StatData;
-import net.Indyuce.mmoitems.util.VersionDependant;
+import net.Indyuce.mmoitems.stat.annotation.VersionDependant;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -30,7 +31,7 @@ public abstract class ItemStat<R extends RandomStatData<S>, S extends StatData> 
     private final List<String> compatibleTypes;
     private final List<Material> compatibleMaterials;
 
-    @Nullable
+    @NotNull
     private String[] aliases = {};
 
     /**
@@ -38,6 +39,10 @@ public abstract class ItemStat<R extends RandomStatData<S>, S extends StatData> 
      * prevent from displaying useless editable stats in the edition menu.
      */
     private boolean enabled = true;
+
+    private StatCategory category;
+
+    protected static final int LORE_LINE_WIDTH = 50;
 
     /**
      * Initializes an item stat
@@ -64,6 +69,12 @@ public abstract class ItemStat<R extends RandomStatData<S>, S extends StatData> 
         // Version dependency
         if (getClass().isAnnotationPresent(VersionDependant.class)) {
             final VersionDependant implVersion = getClass().getAnnotation(VersionDependant.class);
+            if (MythicLib.plugin.getVersion().isUnder(implVersion.version())) disable();
+        }
+
+        // Backwards compatibility
+        if (getClass().isAnnotationPresent(net.Indyuce.mmoitems.util.VersionDependant.class)) {
+            final net.Indyuce.mmoitems.util.VersionDependant implVersion = getClass().getAnnotation(net.Indyuce.mmoitems.util.VersionDependant.class);
             if (MythicLib.plugin.getVersion().isUnder(implVersion.version())) disable();
         }
     }
@@ -177,6 +188,15 @@ public abstract class ItemStat<R extends RandomStatData<S>, S extends StatData> 
         return generalStatFormat;
     }
 
+    @Nullable
+    public StatCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(@Nullable StatCategory category) {
+        this.category = category;
+    }
+
     @NotNull
     public String getName() {
         return name;
@@ -199,7 +219,7 @@ public abstract class ItemStat<R extends RandomStatData<S>, S extends StatData> 
      * <p>
      * Aliases have to follow the UPPER_CASE stat identifier format.
      */
-    @Nullable
+    @NotNull
     public String[] getAliases() {
         return aliases;
     }
@@ -301,6 +321,8 @@ public abstract class ItemStat<R extends RandomStatData<S>, S extends StatData> 
         ItemStat<?, ?> itemStat = (ItemStat<?, ?>) o;
         return id.equals(itemStat.id);
     }
+
+
 
     @Override
     public int hashCode() {

@@ -4,9 +4,9 @@ import io.lumine.mythic.lib.UtilityMethods;
 import io.lumine.mythic.lib.api.item.ItemTag;
 import io.lumine.mythic.lib.api.item.SupportedNBTTagValues;
 import io.lumine.mythic.lib.api.util.AltChar;
+import io.lumine.mythic.lib.version.Sounds;
 import net.Indyuce.mmoitems.ItemStats;
 import net.Indyuce.mmoitems.MMOItems;
-import net.Indyuce.mmoitems.util.MMOUtils;
 import net.Indyuce.mmoitems.api.CustomSound;
 import net.Indyuce.mmoitems.api.item.build.ItemStackBuilder;
 import net.Indyuce.mmoitems.api.item.mmoitem.ReadMMOItem;
@@ -18,10 +18,10 @@ import net.Indyuce.mmoitems.stat.data.SoundListData;
 import net.Indyuce.mmoitems.stat.type.GemStoneStat;
 import net.Indyuce.mmoitems.stat.type.ItemStat;
 import net.Indyuce.mmoitems.stat.type.PlayerConsumable;
+import net.Indyuce.mmoitems.util.MMOUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
@@ -58,7 +58,7 @@ public class CustomSounds extends ItemStat<SoundListData, SoundListData> impleme
 	@Override
 	public void whenClicked(@NotNull EditionInventory inv, @NotNull InventoryClickEvent event) {
 		if (event.getAction() == InventoryAction.PICKUP_ALL)
-			new SoundsEdition(inv.getPlayer(), inv.getEdited()).open(inv);
+			new SoundsEdition(inv.getNavigator(), inv.getEdited()).open(inv);
 
 		if (event.getAction() == InventoryAction.PICKUP_HALF)
 			if (inv.getEditedSection().contains("sounds")) {
@@ -243,5 +243,5 @@ public class CustomSounds extends ItemStat<SoundListData, SoundListData> impleme
 		}
 	}
 
-	void playDefaultSound(@NotNull Player player) { player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EAT, 1, 1); }
+	void playDefaultSound(@NotNull Player player) { player.getWorld().playSound(player.getLocation(), Sounds.ENTITY_GENERIC_EAT, 1, 1); }
 }

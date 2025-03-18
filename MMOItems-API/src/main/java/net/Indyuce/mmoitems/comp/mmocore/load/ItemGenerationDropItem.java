@@ -1,5 +1,6 @@
 package net.Indyuce.mmoitems.comp.mmocore.load;
 
+import io.lumine.mythic.lib.api.item.NBTItem;
 import org.apache.commons.lang.Validate;
 import org.bukkit.inventory.ItemStack;
 
@@ -43,13 +44,15 @@ public abstract class ItemGenerationDropItem extends DropItem {
 				: template.hasOption(TemplateOption.LEVEL_ITEM) ? MMOItems.plugin.getTemplates().rollLevel(rpgPlayer.getLevel()) : 0;
 		final ItemTier itemTier = tier != null ? tier : template.hasOption(TemplateOption.TIERED) ? MMOItems.plugin.getTemplates().rollTier() : null;
 		return new MMOItemBuilder(template, itemLevel, itemTier).build();
-	}
+    }
 
-	@NotNull
-	public ItemStack rollUnidentification(MMOItem mmoitem) {
-		return random.nextDouble() < unidentified ? mmoitem.getType().getUnidentifiedTemplate().newBuilder(mmoitem.newBuilder().buildNBT()).build()
-				: mmoitem.newBuilder().build();
-	}
+    @NotNull
+    public ItemStack rollUnidentification(MMOItem mmoitem) {
+        ItemStack item = mmoitem.newBuilder().build();
+        if (random.nextDouble() < unidentified)
+            item = mmoitem.getType().getUnidentifiedTemplate().newBuilder(NBTItem.get(item)).build();
+        return item;
+    }
 
 	public boolean rollSoulbound() {
 		return random.nextDouble() < soulbound;

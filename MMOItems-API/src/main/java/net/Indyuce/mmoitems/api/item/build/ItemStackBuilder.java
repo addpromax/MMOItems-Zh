@@ -1,10 +1,11 @@
 package net.Indyuce.mmoitems.api.item.build;
 
-import com.google.gson.JsonArray;
 import io.lumine.mythic.lib.MythicLib;
 import io.lumine.mythic.lib.api.item.ItemTag;
 import io.lumine.mythic.lib.api.item.NBTItem;
+import io.lumine.mythic.lib.gson.JsonArray;
 import io.lumine.mythic.lib.util.AdventureUtils;
+import io.lumine.mythic.lib.version.Attributes;
 import io.lumine.mythic.lib.version.VersionUtils;
 import net.Indyuce.mmoitems.ItemStats;
 import net.Indyuce.mmoitems.MMOItems;
@@ -21,7 +22,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.inventory.ItemFlag;
@@ -33,8 +33,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
+// TODO getItemMeta, asNMSCopy = two clones. could be done with NO clone, simply initializing item with proper interfacing
 public class ItemStackBuilder {
     @NotNull
     private final MMOItem mmoitem;
@@ -43,6 +45,12 @@ public class ItemStackBuilder {
     private final ItemMeta meta;
     private final LoreBuilder lore;
     private final List<ItemTag> tags = new ArrayList<>();
+
+    /**
+     * @deprecated Temp fix before MI7
+     */
+    @Deprecated
+    private List<Consumer<NBTItem>> futureActions;
 
     private static final AttributeModifier FAKE_MODIFIER = VersionUtils.attrMod(new NamespacedKey(MMOItems.plugin, "decoy"), 0, Operation.ADD_NUMBER);
 
@@ -97,6 +105,15 @@ public class ItemStackBuilder {
         return meta;
     }
 
+    /**
+     * @deprecated Temp fix before MI7
+     */
+    @Deprecated
+    public void addFutureAction(Consumer<NBTItem> action) {
+        if (futureActions == null) futureActions = new ArrayList<>();
+        futureActions.add(action);
+    }
+
     public void addItemTag(List<ItemTag> newTags) {
         tags.addAll(newTags);
     }
@@ -130,9 +147,8 @@ public class ItemStackBuilder {
          * Enchantment data must never be clear and lack history. This is
          * the basis for when an item is 'old'
          */
-        if (!builtMMOItem.hasData(ItemStats.ENCHANTS)) {
-            builtMMOItem.setData(ItemStats.ENCHANTS, ItemStats.ENCHANTS.getClearStatData());
-        }
+        builtMMOItem.computeData(ItemStats.ENCHANTS);
+        builtMMOItem.computeStatHistory(ItemStats.ENCHANTS);
         //GEM// else {MMOItems.log("\u00a73 -?- \u00a77Apparently found enchantment data \u00a7b" + (mmoitem.getData(ItemStats.ENCHANTS) == null ? "null" : ((EnchantListData) mmoitem.getData(ItemStats.ENCHANTS)).getEnchants().size())); }
 
         /*
@@ -140,9 +156,8 @@ public class ItemStackBuilder {
          * through non-MMOItems supported sources, the name can be changed in
          * an anvil, so the very original name must be saved.
          */
-        if (!builtMMOItem.hasData(ItemStats.NAME))
-            builtMMOItem.setData(ItemStats.NAME, ItemStats.NAME.getClearStatData());
-        builtMMOItem.computeStatHistory(ItemStats.NAME); // Ignore result
+        builtMMOItem.computeData(ItemStats.NAME);
+        builtMMOItem.computeStatHistory(ItemStats.NAME);
 
         // For every stat within this item
         for (ItemStat stat : builtMMOItem.getStats())
@@ -194,7 +209,7 @@ public class ItemStackBuilder {
             } catch (IllegalArgumentException | NullPointerException exception) {
 
                 // That
-                MMOItems.print(Level.WARNING, "An error occurred while trying to generate item '$f{0}$b' with stat '$f{1}$b': {2}",
+                MMOItems.print(Level.SEVERE, "An error occurred while trying to generate item '$f{0}$b' with stat '$f{1}$b': {2}",
                         "ItemStackBuilder", builtMMOItem.getId(), stat.getId(), exception.getMessage());
             }
 
@@ -239,11 +254,14 @@ public class ItemStackBuilder {
          * modifiers, this way armor gives no ARMOR or ARMOR TOUGHNESS to the holder.
          * Since 4.7 attributes are handled via custom calculations
          */
-        meta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED, FAKE_MODIFIER);
+        meta.addAttributeModifier(Attributes.ATTACK_SPEED, FAKE_MODIFIER);
 
         item.setItemMeta(meta);
 
-        return NBTItem.get(item).addTag(tags);
+        NBTItem nbt = NBTItem.get(item).addTag(tags);
+        if (futureActions != null) futureActions.forEach(a -> a.accept(nbt));
+
+        return nbt;
     }
 
     /**

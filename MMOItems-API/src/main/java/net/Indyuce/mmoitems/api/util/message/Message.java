@@ -3,6 +3,7 @@ package net.Indyuce.mmoitems.api.util.message;
 import io.lumine.mythic.lib.MythicLib;
 import org.bukkit.ChatColor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -73,20 +74,17 @@ public enum Message {
     CONDITIONS_NOT_MET("You cannot craft this item."),
     CRAFTING_CANCELED("You cancelled a crafting recipe."),
     CRAFTING_QUEUE_FULL("The crafting queue is currently full."),
-    STATION_BIG_STACK("Amount Crafted: #size#"),
-    RECIPE_PREVIEW("Recipe Preview"),
     UNABLE_TO_REPAIR("This item can't be repaired by this consumable!"),
     ;
 
-    private final String defaultMessage, path, actionBarConfigPath;
+    private final String defaultMessage, actionBarConfigPath;
 
     @NotNull
-    private String current;
+    private String raw;
 
-    private Message(String defaultMessage, String actionBarConfigPath) {
-        this.defaultMessage = defaultMessage;
-        this.current = defaultMessage;
-        this.path = name().toLowerCase().replace("_", "-");
+    private Message(@NotNull String defaultMessage, @Nullable String actionBarConfigPath) {
+        this.defaultMessage = Objects.requireNonNull(defaultMessage);
+        this.raw = defaultMessage;
         this.actionBarConfigPath = actionBarConfigPath;
     }
 
@@ -98,12 +96,18 @@ public enum Message {
         return defaultMessage;
     }
 
-    public String getUpdated() {
-        return MythicLib.plugin.parseColors(current);
+    @NotNull
+    public String getFormatted() {
+        return MythicLib.plugin.parseColors(raw);
     }
 
-    public void setCurrent(@NotNull String str) {
-        this.current = Objects.requireNonNull(str);
+    @NotNull
+    public String getRaw() {
+        return raw;
+    }
+
+    public void setRaw(@NotNull String str) {
+        this.raw = Objects.requireNonNull(str);
     }
 
     public boolean isActionBarMessage() {
@@ -115,11 +119,11 @@ public enum Message {
     }
 
     @Deprecated
-    public String formatRaw(ChatColor prefix, String... toReplace) {
+    public String formatRaw(@Nullable ChatColor prefix, String... toReplace) {
         return format(prefix, toReplace).toString();
     }
 
-    public FormattedMessage format(ChatColor prefix, String... toReplace) {
+    public FormattedMessage format(@Nullable ChatColor prefix, String... toReplace) {
         return new FormattedMessage(this).format(prefix, toReplace);
     }
 }

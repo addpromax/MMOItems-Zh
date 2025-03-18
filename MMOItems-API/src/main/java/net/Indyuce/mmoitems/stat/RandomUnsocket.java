@@ -2,6 +2,7 @@ package net.Indyuce.mmoitems.stat;
 
 import io.lumine.mythic.lib.api.item.NBTItem;
 import io.lumine.mythic.lib.api.util.ui.SilentNumbers;
+import io.lumine.mythic.lib.version.Sounds;
 import net.Indyuce.mmoitems.ItemStats;
 import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.Type;
@@ -17,13 +18,11 @@ import net.Indyuce.mmoitems.stat.data.GemSocketsData;
 import net.Indyuce.mmoitems.stat.data.GemstoneData;
 import net.Indyuce.mmoitems.stat.type.ConsumableItemInteraction;
 import net.Indyuce.mmoitems.stat.type.DoubleStat;
-import net.Indyuce.mmoitems.stat.type.StatHistory;
 import net.Indyuce.mmoitems.util.MMOUtils;
 import net.Indyuce.mmoitems.util.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -136,7 +135,7 @@ public class RandomUnsocket extends DoubleStat implements ConsumableItemInteract
                     Message.RANDOM_UNSOCKET_SUCCESS.format(ChatColor.YELLOW, "#item#", MMOUtils.getDisplayName(event.getCurrentItem()), "#gem#", MMOUtils.getDisplayName(builtGem)).send(player);
                 }
 
-            } catch (Throwable e) { MMOItems.print(Level.WARNING, "无法从物品 $u{0}$b: $f{1} 中拔出宝石", "属性 §e 随机拔出", SilentNumbers.getItemName(event.getCurrentItem()), e.getMessage()); }
+            } catch (Throwable e) { MMOItems.print(Level.SEVERE, "无法从物品 $u{0}$b: $f{1} 中拔出宝石", "属性 §e 随机拔出", SilentNumbers.getItemName(event.getCurrentItem()), e.getMessage()); }
         }
 
         // Replace
@@ -147,7 +146,7 @@ public class RandomUnsocket extends DoubleStat implements ConsumableItemInteract
 
         // Give the gems back
         for (ItemStack drop : player.getInventory().addItem(items2Drop.toArray(new ItemStack[0])).values()) player.getWorld().dropItem(player.getLocation(), drop);
-        player.playSound(player.getLocation(), Sound.BLOCK_IRON_DOOR_OPEN, 1, 2);
+        player.playSound(player.getLocation(), Sounds.BLOCK_IRON_DOOR_OPEN, 1, 2);
         return true;
     }
 }
