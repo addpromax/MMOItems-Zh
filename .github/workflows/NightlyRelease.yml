@@ -5,8 +5,6 @@ name: MMOitem Builder [Nightly Release]
 on:
   push:
     branches: [Zh_cn]
-  schedule:
-    - cron: '0 21 * * *'
   workflow_dispatch:
 
 jobs:
