@@ -34,13 +34,9 @@ jobs:
       run: |
         git tag -f nightly
         git push -f origin nightly
-    - name: Update Nightly Release
-      uses: "ncipollo/release-action@v1"
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
       with:
-        tag: nightly
-        name: "Nightly Release ${{ env.RELEASE_VERSION }}"
-        body: "MMOItems Dev-build for ${{ env.RELEASE_VERSION }}\n> [!TIP]\n> 仅推荐使用 [**Paper**](https://papermc.io/) 或 [**Purpur**](https://purpurmc.org/) 作为服务端使用!\n> MythicLib 建议使用 [**Dev-Build**](https://phoenixdevt.fr/devbuilds)!\n 当前版本并非最终版本！仅为夜间构建版本！"
-        artifacts: |
-          ./target/*.jar
-        allowUpdates: true
-        prerelease: true
+        name: SweetMail
+        path: target/*.jar
+        if-no-files-found: error
