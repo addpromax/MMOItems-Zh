@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 public class ItemModel extends StringStat implements GemStoneStat {
     public ItemModel() {
         super("MODEL", Material.PAINTING, "Item Model",
-                new String[]{"Model to be used to render the item. It is", "meant to replace the CustomModelData tag in 1.21.2+. It", "allows to modify the item texture, model and UI icon", "without having to use CustomModelData.", "Available only on MC 1.21.2+"}, new String[0]);
+                new String[]{"模型将用于渲染该项目。", "仅在 1.21.2+ 版本中可用"}, new String[0]);
     }
 
     @Override
@@ -26,6 +26,6 @@ public class ItemModel extends StringStat implements GemStoneStat {
     @Override
     public void whenLoaded(@NotNull ReadMMOItem mmoitem) {
         ItemMeta meta = mmoitem.getNBT().getItem().getItemMeta();
-        if (meta.hasItemModel()) mmoitem.setData(this, new StringData(meta.getItemModel().asString()));
+        if (meta.hasItemModel()) mmoitem.setData(this, new StringData(meta.getItemModel().toString()));
     }
 }

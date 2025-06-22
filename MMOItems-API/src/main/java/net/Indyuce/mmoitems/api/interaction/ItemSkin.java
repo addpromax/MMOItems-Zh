@@ -149,7 +149,8 @@ public class ItemSkin extends UseItem {
         final ItemMeta skinMeta = nbtSkin.getItem().getItemMeta();
         if (skinMeta != null && meta != null) {
 
-            // TODO SkinStat interface
+            // TODO refactor this code using StatHistory
+            // TODO make it configurable what stats are being transferred over through skins
 
             // Custom model data
             if (skinMeta.hasCustomModelData()) meta.setCustomModelData(skinMeta.getCustomModelData());
@@ -166,11 +167,12 @@ public class ItemSkin extends UseItem {
                 ((LeatherArmorMeta) meta).setColor(((LeatherArmorMeta) skinMeta).getColor());
 
             // Armor trim
-            if (skinMeta instanceof ArmorMeta && meta instanceof ArmorMeta) {
-                ((ArmorMeta) meta).setTrim(((ArmorMeta) skinMeta).getTrim());
-                if (skinMeta.hasItemFlag(ItemFlag.HIDE_ARMOR_TRIM)) meta.addItemFlags(ItemFlag.HIDE_ARMOR_TRIM);
-                else meta.removeItemFlags(ItemFlag.HIDE_ARMOR_TRIM);
-            }
+            if (MythicLib.plugin.getVersion().isAbove(1, 20))
+                if (skinMeta instanceof ArmorMeta && meta instanceof ArmorMeta) {
+                    ((ArmorMeta) meta).setTrim(((ArmorMeta) skinMeta).getTrim());
+                    if (skinMeta.hasItemFlag(ItemFlag.HIDE_ARMOR_TRIM)) meta.addItemFlags(ItemFlag.HIDE_ARMOR_TRIM);
+                    else meta.removeItemFlags(ItemFlag.HIDE_ARMOR_TRIM);
+                }
 
             // Skull texture
             if (volSkin.hasData(ItemStats.SKULL_TEXTURE)
@@ -178,6 +180,27 @@ public class ItemSkin extends UseItem {
                     && nbtSkin.getItem().getType() == Material.PLAYER_HEAD)
                 MythicLib.plugin.getVersion().getWrapper().setProfile((SkullMeta) meta,
                         ((SkullTextureData) volSkin.getData(ItemStats.SKULL_TEXTURE)).getGameProfile());
+
+            // equippable model
+            if (MythicLib.plugin.getVersion().isAbove(1, 21, 4)) {
+                // !! WARNING !!
+                // There's currently a limitation with how the equippable slot
+                // is handled, Spigot basically always provides HEAD as default
+                // equippable slot, even for armors or weapons.
+                if (skinMeta.hasEquippable()) {
+                    meta.setEquippable(skinMeta.getEquippable());
+                }
+            }
+
+            // Custom model data component
+            if (MythicLib.plugin.getVersion().isAbove(1, 21, 4)) {
+                meta.setCustomModelDataComponent(skinMeta.getCustomModelDataComponent());
+            }
+
+            // Item model
+            if (MythicLib.plugin.getVersion().isAbove(1, 21, 2)) {
+                if (skinMeta.hasItemModel()) meta.setItemModel(skinMeta.getItemModel());
+            }
 
             item.setItemMeta(meta);
         }

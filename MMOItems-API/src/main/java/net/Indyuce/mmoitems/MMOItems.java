@@ -1,9 +1,11 @@
 package net.Indyuce.mmoitems;
 
+import io.lumine.mythic.lib.MythicLib;
 import io.lumine.mythic.lib.api.item.NBTItem;
 import io.lumine.mythic.lib.api.util.ui.FriendlyFeedbackMessage;
 import io.lumine.mythic.lib.api.util.ui.FriendlyFeedbackProvider;
 import io.lumine.mythic.lib.util.MMOPlugin;
+import io.lumine.mythic.lib.util.lang3.Validate;
 import io.lumine.mythic.lib.version.SpigotPlugin;
 import net.Indyuce.mmoitems.api.DeathItemsHandler;
 import net.Indyuce.mmoitems.api.ItemTier;
@@ -21,7 +23,6 @@ import net.Indyuce.mmoitems.comp.enchants.CrazyEnchantsStat;
 import net.Indyuce.mmoitems.comp.enchants.EnchantPlugin;
 import net.Indyuce.mmoitems.comp.enchants.MythicEnchantsSupport;
 import net.Indyuce.mmoitems.comp.enchants.advanced_enchants.AdvancedEnchantmentsHook;
-import net.Indyuce.mmoitems.comp.inventory.*;
 import net.Indyuce.mmoitems.comp.mmocore.MMOCoreMMOLoader;
 import net.Indyuce.mmoitems.comp.mmoinventory.MMOInventorySupport;
 import net.Indyuce.mmoitems.comp.mythicmobs.LootsplosionListener;
@@ -32,10 +33,15 @@ import net.Indyuce.mmoitems.comp.rpg.HeroesHook;
 import net.Indyuce.mmoitems.comp.rpg.McMMOHook;
 import net.Indyuce.mmoitems.comp.rpg.RPGHandler;
 import net.Indyuce.mmoitems.gui.edition.recipe.RecipeTypeListGUI;
+import net.Indyuce.mmoitems.inventory.PlayerInventoryManager;
+import net.Indyuce.mmoitems.inventory.provided.MMOInventorySupplier;
+import net.Indyuce.mmoitems.inventory.provided.OrnamentInventorySupplier;
+import net.Indyuce.mmoitems.inventory.provided.VanillaInventorySupplier;
 import net.Indyuce.mmoitems.manager.*;
 import net.Indyuce.mmoitems.manager.data.PlayerDataManager;
+import net.Indyuce.mmoitems.server.ServerAdapter;
+import net.Indyuce.mmoitems.server.SpigotServerAdapter;
 import net.Indyuce.mmoitems.util.PluginUtils;
-import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
@@ -65,11 +71,11 @@ public class MMOItems extends MMOPlugin {
     private final RecipeManager recipeManager = new RecipeManager();
     private final TypeManager typeManager = new TypeManager();
     private final ItemManager itemManager = new ItemManager();
-    private final PlayerInventoryHandler inventory = new PlayerInventoryHandler();
+    private final PlayerInventoryManager inventory = new PlayerInventoryManager();
     private final List<EnchantPlugin<?>> enchantPlugins = new ArrayList<>();
     private final StatManager statManager = new StatManager();
+    private final PlayerDataManager playerDataManager = new PlayerDataManager(this);
 
-    private PlayerDataManager playerDataManager;
     private DropTableManager dropTableManager;
     private WorldGenManager worldGenManager;
     private UpgradeManager upgradeManager;
@@ -78,6 +84,7 @@ public class MMOItems extends MMOPlugin {
     private TierManager tierManager;
     private SetManager setManager;
     private VaultSupport vaultSupport;
+    private ServerAdapter serverAdapter;
     private final List<RPGHandler> rpgPlugins = new ArrayList<>();
 
     /**
@@ -106,7 +113,11 @@ public class MMOItems extends MMOPlugin {
         getLogger().log(Level.INFO, "INFO   Source: phoenix-dvpmt/mmoitems    VERSION: 6.10");
         getLogger().log(Level.INFO, "       QQ: 3217962725     文件: " + getFile().getName());
         getLogger().log(Level.INFO, "       (禁止倒卖)");
-        
+
+        // Paper or Spigot support
+        if (MythicLib.plugin.getVersion().isPaper()) serverAdapter = ServerAdapter.paper();
+        else serverAdapter = new SpigotServerAdapter();
+
         PluginUtils.isDependencyPresent("WorldEdit", u -> {
             try {
                 new WorldEditSupport();
@@ -176,10 +187,7 @@ public class MMOItems extends MMOPlugin {
         // This needs to be before modifier registration (MMOCore)
         findRpgPlugins();
 
-        /*
-         * After tiers, sets and upgrade templates are loaded, MI template data
-         * can be fully loaded
-         */
+        // After tiers, sets and upgrade templates are loaded, MI template data can be fully loaded
         statManager.loadElements(); // Why is this call made there?
         loreManager.reload();
         tierManager = new TierManager();
@@ -216,7 +224,7 @@ public class MMOItems extends MMOPlugin {
          */
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             for (Player player : Bukkit.getOnlinePlayers())
-                PlayerData.get(player).getInventory().updateCheck();
+                PlayerData.get(player).resolveInventory();
         }, 100, getConfig().getInt("inventory-update-delay"));
 
         PluginUtils.isDependencyPresent("mcMMO", unused -> Bukkit.getPluginManager().registerEvents(new McMMONonRPGHook(), this));
@@ -225,10 +233,11 @@ public class MMOItems extends MMOPlugin {
          * Registers Player Inventories. Each of these add locations
          * of items to search for when doing inventory updates.
          */
-        getInventory().register(new DefaultPlayerInventory());
-        PluginUtils.hookDependencyIfPresent("RPGInventory", true, unused -> getInventory().register(new RPGInventoryHook()));
+        getInventory().register(new VanillaInventorySupplier());
         if (MMOItems.plugin.getConfig().getBoolean("iterate-whole-inventory"))
-            getInventory().register(new OrnamentPlayerInventory());
+            getInventory().register(new OrnamentInventorySupplier());
+        PluginUtils.hookDependencyIfPresent("MMOInventory", true, ignore -> getInventory().register(new MMOInventorySupplier()));
+        // TODO PluginUtils.hookDependencyIfPresent("RPGInventory", true, unused -> getInventory().register(new RPGInventoryHook()));
 
         PluginUtils.hookDependencyIfPresent("CrazyEnchantments", true, unused -> getStats().register(new CrazyEnchantsStat()));
         PluginUtils.hookDependencyIfPresent("AdvancedEnchantments", true, plugin -> Bukkit.getPluginManager().registerEvents(new AdvancedEnchantmentsHook(), this));
@@ -251,7 +260,6 @@ public class MMOItems extends MMOPlugin {
 		}*/
 
         // Compatibility with /reload
-        playerDataManager = new PlayerDataManager();
         playerDataManager.initialize(EventPriority.NORMAL, EventPriority.HIGHEST);
 
         // Amount and bukkit recipes
@@ -383,47 +391,8 @@ public class MMOItems extends MMOPlugin {
         return pluginUpdateManager;
     }
 
-    public PlayerInventoryHandler getInventory() {
+    public PlayerInventoryManager getInventory() {
         return inventory;
-    }
-
-    /**
-     * The PlayerInventory interface lets MMOItems knows what items to look for
-     * in player inventories whe doing inventory updates. By default, it only
-     * checks held items + armor slots. However other plugins like MMOInv do
-     * implement custom slots and therefore must register a custom
-     * PlayerInventory instance that tells of additional items to look for.
-     */
-    public void registerPlayerInventory(PlayerInventory value) {
-
-        // Registers in the Inventory Handler
-        getInventory().register(value);
-    }
-
-    /**
-     * The PlayerInventory interface lets MMOItems knows what items to look for
-     * in player inventories whe doing inventory updates. By default, it only
-     * checks held items + armor slots. However other plugins like MMOInv do
-     * implement custom slots and therefore must register a custom
-     * PlayerInventory instance.
-     * <p>
-     * Default instance is DefaultPlayerInventory in comp.inventory
-     *
-     * @param value The player inventory subclass
-     * @deprecated Rather than setting this to the only inventory MMOItems will
-     *         search equipment within, you must add your inventory to the
-     *         handler with <code>getInventory().register()</code>. This method
-     *         will clear all other PlayerInventories for now, as to keep
-     *         backwards compatibility.
-     */
-    @Deprecated
-    public void setPlayerInventory(PlayerInventory value) {
-
-        // Unregisters those previously registered
-        getInventory().unregisterAll();
-
-        // Registers this as the only
-        getInventory().register(value);
     }
 
     /**
@@ -481,6 +450,10 @@ public class MMOItems extends MMOPlugin {
 
     public UpgradeManager getUpgrades() {
         return upgradeManager;
+    }
+
+    public ServerAdapter getServerAdapter() {
+        return serverAdapter;
     }
 
     public TemplateManager getTemplates() {

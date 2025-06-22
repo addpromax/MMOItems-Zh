@@ -16,6 +16,7 @@ import net.Indyuce.mmoitems.stat.data.UpgradeData;
 import net.Indyuce.mmoitems.util.MMOUtils;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -23,6 +24,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.Random;
 
 /**
@@ -107,8 +109,8 @@ public abstract class DurabilityItem {
 
                 // Play sound when item breaks
                 if (player != null) {
-                    player.getWorld().playSound(player.getLocation(), Sounds.ENTITY_ITEM_BREAK, 1, 1);
-                    PlayerData.get(player).getInventory().scheduleUpdate();
+                    if (item.getType().getMaxDurability() == 0) player.getWorld().playSound(player.getLocation(), Sounds.ENTITY_ITEM_BREAK, 1, 1);
+                    PlayerData.get(player).getInventory().watchVanillaSlot(io.lumine.mythic.lib.api.player.EquipmentSlot.fromBukkit(slot), Optional.empty());
                 }
 
                 return itemOutput = null;
@@ -146,9 +148,7 @@ public abstract class DurabilityItem {
         return itemOutput = applyChanges();
     }
 
-    public boolean isLostWhenBroken() {
-        return nbtItem.getBoolean("MMOITEMS_WILL_BREAK");
-    }
+    public abstract boolean isLostWhenBroken();
 
     private boolean isDowngradedWhenBroken() {
         return nbtItem.getBoolean("MMOITEMS_BREAK_DOWNGRADE");
@@ -166,6 +166,17 @@ public abstract class DurabilityItem {
     public abstract void onDurabilityAdd(int gain);
 
     public abstract void onDurabilityDecrease(int loss);
+
+    public void updateInInventory(@NotNull PlayerItemDamageEvent event) {
+        ItemStack resultingItem = toItem();
+        if (resultingItem == null) event.setDamage(BIG_DAMAGE);
+        else {
+            event.setCancelled(true);
+            updateInInventory();
+        }
+    }
+
+    protected static final int BIG_DAMAGE = 1000000;
 
     @NotNull
     public DurabilityItem updateInInventory() {
@@ -200,8 +211,10 @@ public abstract class DurabilityItem {
     @Nullable
     public static DurabilityItem vanilla(@Nullable Player player, @NotNull ItemStack item) {
         try {
-            return new VanillaDurabilityItem(player, NBTItem.get(item), null);
-        } catch(Throwable ignored) {
+            NBTItem nbtItem = NBTItem.get(item);
+            Validate.isTrue(!nbtItem.hasTag(ItemStats.MAX_DURABILITY.getNBTPath()), "Custom durability detected");
+            return new VanillaDurabilityItem(player, nbtItem, null);
+        } catch (Throwable ignored) {
             return null;
         }
     }
@@ -258,4 +271,23 @@ public abstract class DurabilityItem {
 
         return null;
     }
+
+    //region Deprecated
+
+    @Deprecated
+    public boolean isValid() {
+        return true;
+    }
+
+    @Deprecated
+    public boolean isBarHidden() {
+        return true;
+    }
+
+    @Deprecated
+    public int getUnbreakingLevel() {
+        return unbreakingLevel;
+    }
+
+    //endregion
 }

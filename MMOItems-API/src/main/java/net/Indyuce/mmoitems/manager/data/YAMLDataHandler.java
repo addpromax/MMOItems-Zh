@@ -6,20 +6,21 @@ import net.Indyuce.mmoitems.MMOItems;
 import net.Indyuce.mmoitems.api.player.PlayerData;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
 public class YAMLDataHandler extends YAMLSynchronizedDataHandler<PlayerData, DefaultOfflineDataHolder> {
-    public YAMLDataHandler() {
-        super(MMOItems.plugin);
+    public YAMLDataHandler(JavaPlugin plugin) {
+        super(plugin);
     }
 
     @Override
     public void saveInSection(PlayerData playerData, ConfigurationSection config) {
+        //config.set("permissions-from-items", new ArrayList<>(playerData.getInventory().getPermissions()));
         config.createSection("crafting-queue");
-        config.set("permissions-from-items", new ArrayList<>(playerData.getPermissions()));
         playerData.getCrafting().save(config.getConfigurationSection("crafting-queue"));
     }
 
